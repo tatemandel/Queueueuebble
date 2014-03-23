@@ -60,9 +60,11 @@ WSGI_APPLICATION = 'queueuebble.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'queueuebble',
+        'NAME': 'QueueDB',
         'USER': 'queue_admin',
-        'PASSWORD': 'abc123'
+        'PASSWORD': 'queue-password',
+        'HOST': 'queue-db.cdgszcte87bu.us-east-1.rds.amazonaws.com',
+        'PORT': '1512'
     }
 }
 
