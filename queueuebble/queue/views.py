@@ -24,6 +24,10 @@ def register(request):
   
       profile = profile_form.save(commit=False)
       profile.user = user
+      new_user = authenticate(username=request.POST['username'], \
+                              password=request.POST['password'])
+      new_user.backend='django.contrib.auth.backends.ModelBackend' 
+      login(request, new_user)
       registered = True
     else:
       print user_form.errors, profile_form.errors

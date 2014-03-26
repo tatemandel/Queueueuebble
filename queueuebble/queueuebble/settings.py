@@ -68,6 +68,15 @@ DATABASES = {
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'queueuebble',
+#         'USER': 'queue_admin',
+#         'PASSWORD': 'abc123'
+#     }
+# }
+
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 
