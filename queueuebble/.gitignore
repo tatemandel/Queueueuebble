@@ -1,6 +1,9 @@
 *.pyc
 queueuebble/*.pyc
 queue/*.pyc
+queue/migrations/*.pyc
 *~
 queueuebble/*~
 queue/*~
+queue/templates/queue/*~
+queue/migrations/*~

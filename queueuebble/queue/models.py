@@ -21,4 +21,4 @@ class Node(models.Model):
   position = models.IntegerField(default=0)
 
   def __unicode__(self):
-    return self.user
+    return self.user.username
