@@ -51,7 +51,12 @@ def user_login(request):
     if user is not None:
       if user.is_active:
         login(request, user)
-        return HttpResponseRedirect('/')
+        
+        if request.POST.get('next') != '':
+          print request.POST.get('next')
+          return HttpResponseRedirect(request.POST.get('next'))
+        else:
+          return HttpResponseRedirect('/')
       else:
         return HttpResponse("Your Queuebble account is disabled.")
     else:
@@ -59,9 +64,15 @@ def user_login(request):
       return HttpResponse("Invalid login details supplied.")
 
   else:
+    print request.GET.get('next', '/')
+    context['next'] = request.GET.get('next', '/')
     return render_to_response('queue/login.html', {}, context)
 
 @login_required
 def user_logout(request):
   logout(request)
   return HttpResponseRedirect('/')
+
+@login_required
+def dashboard(request):
+  return render(request, 'queue/dashboard.html', {})
