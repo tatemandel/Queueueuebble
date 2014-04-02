@@ -68,7 +68,6 @@ def user_login(request):
     context['next'] = request.GET.get('next', '/')
     return render_to_response('queue/login.html', {}, context)
 
-@login_required
 def user_logout(request):
   logout(request)
   return HttpResponseRedirect('/')
