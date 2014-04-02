@@ -56,7 +56,7 @@ def user_login(request):
           print request.POST.get('next')
           return HttpResponseRedirect(request.POST.get('next'))
         else:
-          return HttpResponseRedirect('/')
+          return HttpResponseRedirect('/dashboard/')
       else:
         return HttpResponse("Your Queuebble account is disabled.")
     else:

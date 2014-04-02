@@ -2,6 +2,7 @@
 
 {% if user.is_authenticated %}
 <h1>Queuebble says... hello, {{ user.username }}!</h1>
+<a href="/dashboard/">My Dashboard</a><br/>
 <a href="/logout/">Logout</a><br/>
 {% else %}
 <h1>Queuebble says... hello, world!</h1>
