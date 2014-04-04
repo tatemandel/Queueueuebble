@@ -108,12 +108,14 @@ def profile_id(request, username, uid):
   puser = UserProfile.objects.get(user=u)
   queue = Queue.objects.get(owner=puser, id=uid)
   nodes = Node.objects.filter(queue=queue)
-
+  qsize = queue.size
   p = UserProfile.objects.get(user=request.user)
   contains = queue.contains(p)
   if request.method == 'POST' and not queue.contains(p):
-    node = Node(user=p, queue=queue)
+    node = Node(user=p, queue=queue, position=qsize)
+    queue.size = qsize + 1
     node.save()
     contains = True
+    print queue.size
 
   return render(request, 'queue/queue.html', locals())
