@@ -84,6 +84,14 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 
+#Email user
+
+EMAIL_HOST = 'smtp.sendgrid.net'
+EMAIL_HOST_USER = 'QQQ'
+EMAIL_HOST_PASSWORD = 'qqqq1234'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
