@@ -57,7 +57,7 @@ def user_login(request):
       if user.is_active:
         login(request, user)
         
-        if request.POST.get('next') != '':
+        if request.POST.get('next') != '/':
           print request.POST.get('next')
           return HttpResponseRedirect(request.POST.get('next'))
         else:
