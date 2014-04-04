@@ -8,6 +8,11 @@
     <input type="submit" value="Add myself to this queue"/>
   </form>
 {% endif %}
+
+{% if contains %}
+<h3> There are {{ user_node.position }} people in front of you </h3>
+{% endif %}
+
 {% for n in nodes %}
   {% if n == user_node %}
     <strong>{{ n.user }}</strong><br/>
