@@ -80,12 +80,18 @@ def user_logout(request):
 @login_required
 def dashboard(request):
   context = RequestContext(request)
-  puser = UserProfile.objects.filter(user=request.user)
+  puser = UserProfile.objects.get(user=request.user)
+
+  if request.method == 'POST':
+    queuename = request.POST['queuename']
+    queue = Queue(name=queuename)
+    queue.save()
+    queue.owner.add(puser)
+
   owned = Queue.objects.filter(owner=puser)
   qin = []
   for n in Node.objects.filter(user=puser):
     qin.append(n.queue)
-
   return render(request, 'queue/dashboard.html', locals())
 
 def profile(request, username):
