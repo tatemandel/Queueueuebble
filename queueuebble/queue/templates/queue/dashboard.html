@@ -1,5 +1,23 @@
 {% if user.is_authenticated %}
 <h1>{{ user.username }}'s Dashboard</h1>
-{% else %}
-<a href="/login/">Login</a>
+
+<a href="/logout/">Logout</a>
+<div>
+  <h2>Queues Owned</h2>
+  {% for q in owned %}
+    {{ q.name }}<br/>
+  {% endfor %}
+</div>
+<form id="add_queue_form" method="post" action="/dashboard/">
+  {% csrf_token %}
+  <h3>Create Queue</h3>
+  Queue Name: <input type="text" name="queuename"/> 
+  <input type="submit" value="sumbit"/>
+</form>
+<div>
+  <h2>Queues In</h2>
+  {% for q in qin %}
+    {{ q.name }}<br/>
+  {% endfor %}
+</div>
 {% endif %}

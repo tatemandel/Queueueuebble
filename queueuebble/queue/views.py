@@ -1,4 +1,5 @@
 from queue.forms import UserForm, UserProfileForm
+from queue.models import UserProfile, Queue, Node
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect
@@ -23,7 +24,8 @@ def register(request):
 
       user.set_password(user.password)
       user.save()
-
+      pu = UserProfile(user=user)
+      pu.save()
       profile = profile_form.save(commit=False)
       profile.user = user
       new_user = authenticate(username=request.POST['username'], \
@@ -57,8 +59,7 @@ def user_login(request):
     if user is not None:
       if user.is_active:
         login(request, user)
-
-        if request.POST.get('next') != '':
+        if request.POST.get('next') != '/':
           print request.POST.get('next')
           return HttpResponseRedirect(request.POST.get('next'))
         else:
@@ -80,4 +81,41 @@ def user_logout(request):
 
 @login_required
 def dashboard(request):
-  return render(request, 'queue/dashboard.html', {})
+  context = RequestContext(request)
+  puser = UserProfile.objects.get(user=request.user)
+
+  if request.method == 'POST':
+    queuename = request.POST['queuename']
+    queue = Queue(name=queuename)
+    queue.save()
+    queue.owner.add(puser)
+
+  owned = Queue.objects.filter(owner=puser)
+  qin = []
+  for n in Node.objects.filter(user=puser):
+    qin.append(n.queue)
+  return render(request, 'queue/dashboard.html', locals())
+
+def profile(request, username):
+  u = User.objects.get(username=username)
+  puser = UserProfile.objects.get(user=u)
+  owned = Queue.objects.filter(owner=puser)
+
+  print username
+  return render(request, 'queue/profile.html', locals())
+
+@login_required
+def profile_id(request, username, uid):
+  u = User.objects.get(username=username)
+  puser = UserProfile.objects.get(user=u)
+  queue = Queue.objects.get(owner=puser, id=uid)
+  nodes = Node.objects.filter(queue=queue)
+
+  p = UserProfile.objects.get(user=request.user)
+  contains = queue.contains(p)
+  if request.method == 'POST' and not queue.contains(p):
+    node = Node(user=p, queue=queue)
+    node.save()
+    contains = True
+
+  return render(request, 'queue/queue.html', locals())
