@@ -112,16 +112,17 @@ def profile_id(request, username, uid):
   nodes = Node.objects.filter(queue=queue)
 
   p = UserProfile.objects.get(user=request.user)
-  users_nodes = Node.objects.filter(queue=queue, user=p)
-  
-  user_node = None
-  if not users_nodes == []:
-    user_node = users_nodes[0]
 
   contains = queue.contains(p)
   if request.method == 'POST' and not queue.contains(p):
     node = Node(user=p, queue=queue)
     node.save()
     contains = True
+
+  users_nodes = Node.objects.filter(queue=queue, user=p)
+
+  user_node = None
+  if not len(users_nodes) == 0:
+    user_node = users_nodes[0]
 
   return render(request, 'queue/queue.html', locals())

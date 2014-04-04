@@ -5,7 +5,7 @@
 <div>
   <h2>Queues Owned</h2>
   {% for q in owned %}
-    {{ q.name }}<br/>
+    <a href="/profile/{{ user.username }}/{{ q.id }}">{{ q.name }}</a><br/>
   {% endfor %}
 </div>
 <form id="add_queue_form" method="post" action="/dashboard/">
