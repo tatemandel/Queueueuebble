@@ -109,7 +109,8 @@ def profile_id(request, username, uid):
   u = User.objects.get(username=username)
   puser = UserProfile.objects.get(user=u)
   queue = Queue.objects.get(owner=puser, id=uid)
-  nodes = Node.objects.filter(queue=queue)
+  nodes = list(Node.objects.filter(queue=queue))
+  nodes.sort(key=lambda x: x.position)
   qsize = queue.size
   p = UserProfile.objects.get(user=request.user)
 
