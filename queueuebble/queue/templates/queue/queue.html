@@ -9,6 +9,10 @@
   </form>
 {% endif %}
 {% for n in nodes %}
-  {{ n.user }}
+  {% if n == user_node %}
+    <strong>{{ n.user }}</strong><br/>
+  {% else %}
+    {{ n.user }}<br/>
+  {% endif %}
 {% endfor %}
 

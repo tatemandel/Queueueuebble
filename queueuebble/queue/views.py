@@ -6,6 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.mail import send_mail
 
 def index(request):
   return render(request, 'queue/index.html', {})
@@ -17,23 +18,25 @@ def register(request):
   if request.method == 'POST':
     user_form = UserForm(data=request.POST)
     profile_form = UserProfileForm(data=request.POST)
-    
+
     if user_form.is_valid() and profile_form.is_valid():
       user = user_form.save()
 
       user.set_password(user.password)
       user.save()
-
       pu = UserProfile(user=user)
       pu.save()
-  
       profile = profile_form.save(commit=False)
       profile.user = user
       new_user = authenticate(username=request.POST['username'], \
                               password=request.POST['password'])
-      new_user.backend='django.contrib.auth.backends.ModelBackend' 
+      new_user.backend='django.contrib.auth.backends.ModelBackend'
       login(request, new_user)
       registered = True
+
+      #send confirmation mail
+      #print user.email
+      #send_mail('Welcome to queueubble!', 'Sup niggs.', 'jonathanp.chen@gmail.com', [user.email], fail_silently=False)
     else:
       print user_form.errors, profile_form.errors
 
@@ -44,7 +47,7 @@ def register(request):
   return render_to_response(
     'queue/register.html',
     {'user_form': user_form, 'profile_form': profile_form, 'registered': registered},
-    context)    
+    context)
 
 def user_login(request):
   context = RequestContext(request)
@@ -52,11 +55,10 @@ def user_login(request):
     username = request.POST['username']
     password = request.POST['password']
     user = authenticate(username=username, password=password)
-    
+
     if user is not None:
       if user.is_active:
         login(request, user)
-        
         if request.POST.get('next') != '/':
           print request.POST.get('next')
           return HttpResponseRedirect(request.POST.get('next'))
@@ -98,7 +100,7 @@ def profile(request, username):
   u = User.objects.get(username=username)
   puser = UserProfile.objects.get(user=u)
   owned = Queue.objects.filter(owner=puser)
-  
+
   print username
   return render(request, 'queue/profile.html', locals())
 
@@ -110,6 +112,12 @@ def profile_id(request, username, uid):
   nodes = Node.objects.filter(queue=queue)
   qsize = queue.size
   p = UserProfile.objects.get(user=request.user)
+  users_nodes = Node.objects.filter(queue=queue, user=p)
+  
+  user_node = None
+  if not users_nodes == []:
+    user_node = users_nodes[0]
+
   contains = queue.contains(p)
   if request.method == 'POST' and not queue.contains(p):
     node = Node(user=p, queue=queue, position=qsize)
