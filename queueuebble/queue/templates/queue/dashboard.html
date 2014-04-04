@@ -1,5 +1,16 @@
 {% if user.is_authenticated %}
 <h1>{{ user.username }}'s Dashboard</h1>
-{% else %}
-<a href="/login/">Login</a>
+
+<div>
+  <h2>Queues Owned</h2>
+  {% for q in owned %}
+    {{ q.name }}<br/>
+  {% endfor %}
+</div>
+<div>
+  <h2>Queues In</h2>
+  {% for q in qin %}
+    {{ q.name }}<br/>
+  {% endfor %}
+</div>
 {% endif %}

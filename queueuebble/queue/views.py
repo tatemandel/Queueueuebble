@@ -1,4 +1,5 @@
 from queue.forms import UserForm, UserProfileForm
+from queue.models import UserProfile, Queue, Node
 from django.shortcuts import render, render_to_response
 from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect
@@ -21,6 +22,9 @@ def register(request):
 
       user.set_password(user.password)
       user.save()
+
+      pu = UserProfile(user=user)
+      pu.save()
   
       profile = profile_form.save(commit=False)
       profile.user = user
@@ -74,4 +78,11 @@ def user_logout(request):
 
 @login_required
 def dashboard(request):
-  return render(request, 'queue/dashboard.html', {})
+  context = RequestContext(request)
+  puser = UserProfile.objects.filter(user=request.user)
+  owned = Queue.objects.filter(owner=puser)
+  qin = []
+  for n in Node.objects.filter(user=puser):
+    qin.append(n.queue)
+
+  return render(request, 'queue/dashboard.html', locals())
