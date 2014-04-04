@@ -20,7 +20,12 @@ class Queue(models.Model):
   
   def __unicode__(self):
     return self.name
- 
+
+  def contains(self, userprof):
+    nodes = list(self.node_set.all());
+    nodeUsers = map((lambda n: n.user), nodes)
+    return userprof in nodeUsers
+
   class Meta:
     ordering = ('name',)
 

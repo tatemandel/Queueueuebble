@@ -1,6 +1,7 @@
 {% if user.is_authenticated %}
 <h1>{{ user.username }}'s Dashboard</h1>
 
+<a href="/logout/">Logout</a>
 <div>
   <h2>Queues Owned</h2>
   {% for q in owned %}

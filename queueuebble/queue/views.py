@@ -102,10 +102,18 @@ def profile(request, username):
   print username
   return render(request, 'queue/profile.html', locals())
 
+@login_required
 def profile_id(request, username, uid):
   u = User.objects.get(username=username)
   puser = UserProfile.objects.get(user=u)
   queue = Queue.objects.get(owner=puser, id=uid)
   nodes = Node.objects.filter(queue=queue)
+
+  p = UserProfile.objects.get(user=request.user)
+  contains = queue.contains(p)
+  if request.method == 'POST' and not queue.contains(p):
+    node = Node(user=p, queue=queue)
+    node.save()
+    contains = True
 
   return render(request, 'queue/queue.html', locals())

@@ -1,6 +1,13 @@
 <h1>{{ username }}'s Queue</h1>
 
 <h2>{{ queue.name }}</h2>
+{% if not contains %}
+  <form id="add_to_queue_form" method="post" 
+        action="/profile/{{ username }}/{{ uid }}">
+    {% csrf_token %}
+    <input type="submit" value="Add myself to this queue"/>
+  </form>
+{% endif %}
 {% for n in nodes %}
   {{ n.user }}
 {% endfor %}
