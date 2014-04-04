@@ -7,6 +7,9 @@ class UserProfile(models.Model):
   def __unicode__(self):
     return self.user.username
 
+  def dostuff(self):
+    return "hey"
+
   class Meta:
     ordering = ('user',)
 

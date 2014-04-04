@@ -5,6 +5,7 @@ from django.template import RequestContext
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 
 def index(request):
   return render(request, 'queue/index.html', {})
@@ -86,3 +87,19 @@ def dashboard(request):
     qin.append(n.queue)
 
   return render(request, 'queue/dashboard.html', locals())
+
+def profile(request, username):
+  u = User.objects.get(username=username)
+  puser = UserProfile.objects.get(user=u)
+  owned = Queue.objects.filter(owner=puser)
+  
+  print username
+  return render(request, 'queue/profile.html', locals())
+
+def profile_id(request, username, uid):
+  u = User.objects.get(username=username)
+  puser = UserProfile.objects.get(user=u)
+  queue = Queue.objects.get(owner=puser, id=uid)
+  nodes = Node.objects.filter(queue=queue)
+
+  return render(request, 'queue/queue.html', locals())
