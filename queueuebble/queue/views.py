@@ -117,6 +117,7 @@ def profile_id(request, username, uid):
   if request.method == 'POST' and not queue.contains(p):
     node = Node(user=p, queue=queue, position=qsize)
     queue.size = qsize + 1
+    queue.save()
     node.save()
     contains = True
     print queue.size
