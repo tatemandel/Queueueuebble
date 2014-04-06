@@ -112,8 +112,9 @@ def profile_id(request, username, uid):
   nodes.sort(key=lambda x: x.position)
   qsize = queue.size
   p = UserProfile.objects.get(user=request.user)
-
+  myqueue = p == puser
   contains = queue.contains(p)
+
   if request.method == 'POST' and not queue.contains(p):
     node = Node(user=p, queue=queue, position=qsize)
     queue.size = qsize + 1
