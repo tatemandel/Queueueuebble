@@ -121,6 +121,7 @@ def profile_id(request, username, uid):
     node.save()
     contains = True
     print queue.size
+    nodes = list(Node.objects.filter(queue=queue))
 
   users_nodes = Node.objects.filter(queue=queue, user=p)
 
