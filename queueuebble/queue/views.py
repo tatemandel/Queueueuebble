@@ -82,12 +82,19 @@ def user_logout(request):
 def dashboard(request):
   context = RequestContext(request)
   puser = UserProfile.objects.get(user=request.user)
+  exists = False
+  queuename = None
 
   if request.method == 'POST':
     queuename = request.POST['queuename']
-    queue = Queue(name=queuename)
-    queue.save()
-    queue.owner.add(puser)
+    queues = len(Queue.objects.filter(name=queuename))
+    print queues
+    if queues == 0:
+      queue = Queue(name=queuename)
+      queue.save()
+      queue.owner.add(puser)
+    else:
+      exists = True
 
   owned = Queue.objects.filter(owner=puser)
   qin = []

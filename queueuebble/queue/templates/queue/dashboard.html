@@ -21,3 +21,8 @@
   {% endfor %}
 </div>
 {% endif %}
+{% if exists and not queuename == None %}
+  <script>
+    alert("Queue with that name already exists!")
+  </script>
+{% endif %}
