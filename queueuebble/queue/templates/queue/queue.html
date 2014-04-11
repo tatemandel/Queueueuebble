@@ -5,7 +5,7 @@
   <form id="add_to_queue_form" method="post" 
         action="/profile/{{ username }}/{{ uid }}">
     {% csrf_token %}
-    <input type="submit" value="Add myself to this queue"/>
+    <input type="submit" name="addMyself" value="Add myself to this queue"/>
   </form>
 {% endif %}
 
@@ -15,9 +15,24 @@
 
 {% for n in nodes %}
   {% if n == user_node %}
-    <strong>{{ n.user }}</strong><br/>
+    <strong>{{ n.user }}</strong>
+    <form id="remove_myself_form" method="post" 
+          action="/profile/{{ username }}/{{ uid }}">
+      {% csrf_token %}
+      <input type="submit" name="removeMyself" value="Remove myself from this queue"/>
+    </form>
+    <br/>
   {% else %}
-    {{ n.user }}<br/>
+    {{ n.user }} 
+    {% if myqueue %}
+      <form id="remove_from_myqueue_form" method="post" 
+            action="/profile/{{ username }}/{{ uid }}">
+	{% csrf_token %}
+	<input type="hidden" name="nodeToRemove2" value="{{ n }}"/>
+	<input type="submit" name="removeFromMyQueue" value="Remove this person from my Queue" />
+      </form>
+    {% endif %}
+    <br/>
   {% endif %}
 {% endfor %}
 

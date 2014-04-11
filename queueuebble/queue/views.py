@@ -121,18 +121,32 @@ def profile_id(request, username, uid):
   p = UserProfile.objects.get(user=request.user)
   myqueue = p == puser
   contains = queue.contains(p)
+  users_nodes = Node.objects.filter(queue=queue, user=p)
+  user_node = None
+  if not len(users_nodes) == 0:
+    user_node = users_nodes[0]
 
-  if request.method == 'POST' and not queue.contains(p):
-    node = Node(user=p, queue=queue, position=qsize)
-    queue.size = qsize + 1
-    queue.save()
-    node.save()
-    contains = True
-    print queue.size
-    nodes = list(Node.objects.filter(queue=queue))
+  if request.method == 'POST': 
+    if ('addMyself' in request.POST) and not queue.contains(p):
+      node = Node(user=p, queue=queue, position=qsize)
+      queue.size = qsize + 1
+      queue.save()
+      node.save()
+      contains = True
+      print queue.size
+      nodes = list(Node.objects.filter(queue=queue))
+    if 'removeMyself' in request.POST:
+      if not user_node == None:
+        user_node.delete()
+        queue.size = queue.size - 1
+        queue.save()
+        nodes = list(Node.objects.filter(queue=queue))
+        nodes.sort(key=lambda x: x.position)
+      contains = False
+    if 'removeFromMyQueue' in request.POST:
+      print 'removerfromqueue'
 
   users_nodes = Node.objects.filter(queue=queue, user=p)
-
   user_node = None
   if not len(users_nodes) == 0:
     user_node = users_nodes[0]
