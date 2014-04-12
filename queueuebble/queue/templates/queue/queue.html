@@ -3,21 +3,25 @@
 <h2>{{ queue.name }}</h2>
 {% if not contains and not myqueue %}
   <form id="add_to_queue_form" method="post" 
-        action="/profile/{{ username }}/{{ uid }}">
+        action="/profile/{{ username }}/{{ uid }}/">
     {% csrf_token %}
     <input type="submit" name="addMyself" value="Add myself to this queue"/>
   </form>
 {% endif %}
 
 {% if contains %}
-<h4> There are {{ user_node.position }} people in front of you </h4>
+  {% if user_node.position == 1 %}
+    <h4> There is {{ user_node.position }} person in front of you.</h4>
+  {% else %}
+    <h4> There are {{ user_node.position }} people in front of you.</h4>
+  {% endif %}
 {% endif %}
 
 {% for n in nodes %}
   {% if n == user_node %}
     <strong>{{ n.user }}</strong>
     <form id="remove_myself_form" method="post" 
-          action="/profile/{{ username }}/{{ uid }}">
+          action="/profile/{{ username }}/{{ uid }}/">
       {% csrf_token %}
       <input type="submit" name="removeMyself" value="Remove myself from this queue"/>
     </form>

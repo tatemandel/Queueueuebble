@@ -152,3 +152,19 @@ def profile_id(request, username, uid):
     user_node = users_nodes[0]
 
   return render(request, 'queue/queue.html', locals())
+
+def search_form(request):
+  return render(request, 'queue/search_form.html')
+
+def search(request):
+  if 'q' in request.GET and request.GET['q']:
+    q = request.GET['q']
+    queues = Queue.objects.filter(name__icontains=q)
+    queue_map = {}
+    for qu in queues:
+      owner = qu.owner.all()[0].user.username
+      queue_map[qu] = owner
+    users = User.objects.filter(username__icontains=q)
+    return render(request, 'queue/search_results.html', {'queues': queue_map, 'users': users, 'query': q})
+  else:
+    return HttpResponse('Submit a search term')
