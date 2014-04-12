@@ -144,7 +144,18 @@ def profile_id(request, username, uid):
         nodes.sort(key=lambda x: x.position)
       contains = False
     if 'removeFromMyQueue' in request.POST:
-      print 'removerfromqueue'
+      uRemoveName = request.POST.get('nodeToRemove2')
+      if not uRemoveName == None:
+        uRemoveUser = User.objects.get(username=uRemoveName)
+        uRemoveProf = UserProfile.objects.get(user=uRemoveUser)
+        uRemoveNodes = Node.objects.filter(queue=queue,user=uRemoveProf)
+        if not len(uRemoveNodes) == 0:
+          uRemoveNode = uRemoveNodes[0];
+          uRemoveNode.delete();
+          queue.size = queue.size - 1
+          queue.save();
+          nodes = list(Node.objects.filter(queue=queue))
+          nodes.sort(key=lambda x: x.position)
 
   users_nodes = Node.objects.filter(queue=queue, user=p)
   user_node = None
