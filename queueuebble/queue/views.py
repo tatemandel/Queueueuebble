@@ -164,6 +164,8 @@ def profile_id(request, username, uid):
           queue.save();
           nodes = list(Node.objects.filter(queue=queue))
           nodes.sort(key=lambda x: x.position)
+    if 'reorderQueue' in request.POST:
+      print 'reorder'
 
   users_nodes = Node.objects.filter(queue=queue, user=p)
   user_node = None

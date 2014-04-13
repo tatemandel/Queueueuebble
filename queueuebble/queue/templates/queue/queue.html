@@ -1,3 +1,7 @@
+<head>
+  <script type="text/javascript" src="http://farhadi.ir/projects/html5sortable/jquery-1.7.1.min.js"></script>
+  <script type="text/javascript" src="http://farhadi.ir/projects/html5sortable/jquery.sortable.js"></script>  
+</head>
 <h1>{{ username }}'s Queue</h1>
 
 <h3>{{ queue.name }}</h3>
@@ -16,7 +20,6 @@
   {% endif %}
 {% endif %}
 
-
 {% if not contains and not myqueue %}
   <form id="add_to_queue_form" method="post" 
         action="/profile/{{ username }}/{{ uid }}/">
@@ -33,26 +36,38 @@
   {% endif %}
 {% endif %}
 
-{% for n in nodes %}
-  {% if n == user_node %}
-    <strong>{{ n.user }}</strong>
-    <form id="remove_myself_form" method="post" 
+<form id="reorder" method="post" action="/profile/{{ username }}/{{ uid }}">
+  <ul id="sortable1" class="sortable list">
+    {% for n in nodes %}
+      {% if n == user_node %}
+        <li draggable="true"><strong>{{ n.user }}</strong>
+	  <form id="remove_myself_form" method="post" 
           action="/profile/{{ username }}/{{ uid }}/">
-      {% csrf_token %}
-      <input type="submit" name="removeMyself" value="Remove myself from this queue"/>
-    </form>
-    <br/>
-  {% else %}
-    {{ n.user }} 
-    {% if myqueue %}
-      <form id="remove_from_myqueue_form" method="post" 
-            action="/profile/{{ username }}/{{ uid }}/">
-	{% csrf_token %}
-	<input type="hidden" name="nodeToRemove2" value="{{ n.user }}"/>
-	<input type="submit" name="removeFromMyQueue" value="Remove this person from my Queue"/>
-      </form>
+	    {% csrf_token %}
+	    <input type="submit" name="removeMyself" value="Remove myself from this queue"/>
+	  </form>
+          <br/></li>
+      {% else %}
+	<li draggable="true">{{ n.user }} 
+	  {% if myqueue %}
+            <form id="remove_from_myqueue_form" method="post" 
+              action="/profile/{{ username }}/{{ uid }}/">
+	      {% csrf_token %}
+	      <input type="hidden" name="nodeToRemove2" value="{{ n.user }}"/>
+	      <input type="submit" name="removeFromMyQueue" value="Remove this person from my Queue"/>
+	    </form>
+          {% endif %}
+          <br/></li>
+      {% endif %}
+    {% endfor %}
+    {% if not qsize == 0 %}
+      <input type="submit" name="reorderQueue" value="Submit Reordering"/>
     {% endif %}
-    <br/>
-  {% endif %}
-{% endfor %}
+  </ul>
+<script>
+   $(function(){
+     $('#sortable1').sortable();
+   });
+  </script>
+</form>
 
