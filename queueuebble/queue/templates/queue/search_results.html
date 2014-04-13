@@ -3,9 +3,9 @@
 {% if queues %}
   <p>Found {{ queues|length }} queue{{ queues|pluralize }}.</p>
   <ul>
-    {% for queue, owner in queues.iteritems %}
+    {% for queue in queues %}
     <li>
-      <a href="/profile/{{ owner }}/{{ queue.id }}/">
+      <a href="/profile/{{ queue.creator.user.username }}/{{ queue.id }}/">
         {{ queue.name }}
       </a>
     </li>

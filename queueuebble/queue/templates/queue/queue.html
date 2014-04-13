@@ -1,6 +1,22 @@
 <h1>{{ username }}'s Queue</h1>
 
-<h2>{{ queue.name }}</h2>
+<h3>{{ queue.name }}</h3>
+
+{% if not myqueue %}
+  {% if fav %}
+    <form method="post" id="remove_favorite" action="/profile/{{ username }}/{{ uid }}/">
+      {% csrf_token %}
+      <input type="submit" name="removeFavorite" value="Remove from Favorites"/>
+    </form>
+  {% else %}
+    <form method="post" id="add_favorite" action="/profile/{{ username }}/{{ uid }}/">
+      {% csrf_token %}
+      <input type="submit" name="addFavorite" value="Add to Favorites"/>
+    </form>
+  {% endif %}
+{% endif %}
+
+
 {% if not contains and not myqueue %}
   <form id="add_to_queue_form" method="post" 
         action="/profile/{{ username }}/{{ uid }}/">

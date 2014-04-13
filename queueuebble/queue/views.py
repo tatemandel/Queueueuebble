@@ -90,13 +90,16 @@ def dashboard(request):
     queues = len(Queue.objects.filter(name=queuename, owner=puser))
     print queues
     if queues == 0:
-      queue = Queue(name=queuename)
+      queue = Queue(name=queuename, creator=puser)
       queue.save()
       queue.owner.add(puser)
+      queue.save()
     else:
       exists = True
 
   owned = Queue.objects.filter(owner=puser)
+  favorites = puser.favorites.all()
+  visited = puser.visited.all()
   qin = []
   for n in Node.objects.filter(user=puser):
     qin.append(n.queue)
@@ -107,7 +110,6 @@ def profile(request, username):
   puser = UserProfile.objects.get(user=u)
   owned = Queue.objects.filter(owner=puser)
 
-  print username
   return render(request, 'queue/profile.html', locals())
 
 @login_required
@@ -123,17 +125,23 @@ def profile_id(request, username, uid):
   contains = queue.contains(p)
   users_nodes = Node.objects.filter(queue=queue, user=p)
   user_node = None
+  fav = queue in p.favorites.all()
   if not len(users_nodes) == 0:
     user_node = users_nodes[0]
 
   if request.method == 'POST': 
+    if 'addFavorite' in request.POST:
+      p.favorites.add(queue)
+      fav = True
+    if 'removeFavorite' in request.POST:
+      p.favorites.remove(queue)
+      fav = False
     if ('addMyself' in request.POST) and not queue.contains(p):
       node = Node(user=p, queue=queue, position=qsize)
       queue.size = qsize + 1
       queue.save()
       node.save()
       contains = True
-      print queue.size
       nodes = list(Node.objects.filter(queue=queue))
     if 'removeMyself' in request.POST:
       if not user_node == None:
@@ -171,11 +179,7 @@ def search(request):
   if 'q' in request.GET and request.GET['q']:
     q = request.GET['q']
     queues = Queue.objects.filter(name__icontains=q)
-    queue_map = {}
-    for qu in queues:
-      owner = qu.owner.all()[0].user.username
-      queue_map[qu] = owner
     users = User.objects.filter(username__icontains=q)
-    return render(request, 'queue/search_results.html', {'queues': queue_map, 'users': users, 'query': q})
+    return render(request, 'queue/search_results.html', {'queues': queues, 'users': users, 'query': q})
   else:
     return HttpResponse('Submit a search term')

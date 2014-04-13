@@ -5,7 +5,7 @@
 <div>
   <h2>Queues Owned</h2>
   {% for q in owned %}
-    <a href="/profile/{{ user.username }}/{{ q.id }}">{{ q.name }}</a><br/>
+    <a href="/profile/{{ q.creator.user.username }}/{{ q.id }}">{{ q.name }}</a><br/>
   {% endfor %}
 </div>
 <form id="add_queue_form" method="post" action="/dashboard/">
@@ -20,7 +20,7 @@
     {{ q.name }}<br/>
   {% endfor %}
 </div>
-{% endif %}
+
 {% if exists and not queuename == None %}
   <script>
     alert("Queue with that name already exists!")
@@ -32,3 +32,22 @@
   <input type="text" name="q"/>
   <input type="submit" value="Search"/>
 </form>
+
+<h2>Favorites</h2>
+{% for fav in favorites %}
+  <a href="/profile/{{ fav.creator.user.username }}/{{ fav.id }}/">{{ fav.name }}</a>
+{% endfor %}
+{% if not favorites %}
+  <p>You have no favorites</p>
+{% endif %}
+
+
+<h2>Recently Visited</h2>
+{% for vis in visited %}
+  <a href="/profile/{{ vis.creator.user.username }}/{{ vis.id }}/">{{ vis.name }}</a>
+{% endfor %}
+{% if not visited %}
+  <p>You haven't visited any queues yet.</p>
+{% endif %}
+
+{% endif %}
