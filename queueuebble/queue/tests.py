@@ -29,12 +29,17 @@ class RedirectTests(TestCase):
     self.assertEqual(response.status_code, 302)
 
 class DashboardTests(TestCase):
-  def test_dashboard_logged_in(self):
+  def setUp(self):
     self.user = User.objects.create_user('test', 'test@test.test', 'test')
     self.puser = UserProfile(user=self.user)
+    self.user.save()
+    self.puser.save()
     login_successful = self.client.login(username=self.user.username, password='test')
     self.assertTrue(login_successful)
 
+  def test_dashboard_logged_in(self):
+    response = self.client.get(reverse('dashboard'))
+    self.assertEqual(response.status_code, 200)
 
 class RegisterTests(TestCase):
   def test_registration_logs_in(self):
