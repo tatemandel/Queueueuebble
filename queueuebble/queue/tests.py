@@ -7,7 +7,7 @@ from django.test.client import Client
 class LoginTests(TestCase):
   def setUp(self):
     self.client = Client()
-    self.user = User.objects.create_user('test', 'test@test.test', 'test')  
+    self.user = User.objects.create_user('test', 'test@test.test', 'test')
 
   def test_login_status(self):
     self.client.login(username='test', password='test')
@@ -48,7 +48,7 @@ class DashboardTests(TestCase):
                                 })
     qs = Queue.objects.filter(creator=self.user, name='test_queue')
     self.assertTrue(len(qs) == 1)
-        
+
   def test_dashboard_search_redirects(self):
     response = self.client.get(reverse('search'),
                                { 'q' : 'test_query' })
@@ -64,6 +64,12 @@ class DashboardTests(TestCase):
                                { 'q' : 'test' })
     self.assertTrue("Found 1 user" in response.content)
     self.assertTrue(" queue" not in response.content)
+
+  def test_dashboard_search_empty_string(self):
+    response = self.client.get(reverse('search'),
+                                { 'q' : '' })
+    self.assertTrue("Submit a search term" in response.content)
+
 
 class RegisterTests(TestCase):
   def test_registration_logs_in(self):
