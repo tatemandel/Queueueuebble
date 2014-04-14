@@ -139,7 +139,7 @@ action="/profile/{{ username }}/{{ uid }}/">
     {% endif %}
   </ul>
    <script>
-    $(function(){
+    $(function() {
       $('#sortable1').sortable();
       
       $('.sortable').sortable().bind('sortupdate', function() {
@@ -149,7 +149,7 @@ action="/profile/{{ username }}/{{ uid }}/">
         $('#sortable1 li').each(function() {
           datas[i] = $(this).attr('user');
           i++;
-        }
+        });
 
         $('#reorderData')[0].value = datas;
         
