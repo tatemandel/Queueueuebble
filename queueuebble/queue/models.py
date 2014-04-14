@@ -41,7 +41,14 @@ class Node(models.Model):
   def getStatus(self):
     if self.status == 0: return "Not started"
     elif self.status == 1: return "In progress"
-    else: return 'Completed'
+    else: return "Completed"
+
+  def changeStatus(self, toStatus):
+    if toStatus == "Not started":
+      self.status = 0
+    elif toStatus == "In progress":
+      self.status = 1
+    else: self.status = 2
 
   class Meta:
     ordering = ('queue', 'position', 'user')
