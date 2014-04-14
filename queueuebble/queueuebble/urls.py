@@ -1,7 +1,7 @@
 from django.conf.urls import patterns, include, url
 from queueuebble.views import hello
 from queue import views
-
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
 admin.autodiscover()
 
@@ -20,3 +20,5 @@ urlpatterns = patterns('',
     url(r'^profile/(?P<username>[\w\.@+-]+)/$', views.profile, name='profile'),
     url(r'^profile/(?P<username>[\w\.@+-]+)/(?P<uid>\d+)$', views.profile_id, name='profile_id')
 )
+
+urlpatterns += staticfiles_urlpatterns()

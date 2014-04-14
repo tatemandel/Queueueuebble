@@ -1,28 +1,29 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>QUEUEUEUEUEUEUEUEUEBBLE</title>
-  </head>
+{%extends 'base.html' %}
 
-  <body>
+{%block content%}
+<head>
+    <title>QUEUEUEUEUEUEUEUEUEBBLE</title>
+</head>
+
+<body>
     <h1>Register with Queuebble</h1>
-    
+
     {% if registered %}
     Queuebble says: <strong>thank you for registering!</strong>
     <a href="/">Return home</a><br/>
     {% else %}
     Queuebble says: <strong>register here!</strong><br/>
-    
-    <form id="user_form" method="post" action="/register/"
-          enctype="multipart/form-data">
-      {% csrf_token %}
-      
-      {{ user_form.as_p }}
-      {{ profile_form.as_p }}
 
-      <input type="submit" name="submit" value="Register" />
+    <form id="user_form" method="post" action="/register/"
+        enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {{ user_form.as_p }}
+        {{ profile_form.as_p }}
+
+        <input type="submit" name="submit" value="Register" />
     </form>
     {% endif %}
     <a href="/">Home</a>
-  </body>
-</html>
+</body>
+{% endblock %}

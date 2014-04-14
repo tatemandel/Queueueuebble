@@ -1,3 +1,6 @@
+{% extends 'base.html' %}
+
+{% block index_block %}
 <h1>WELCOME!!!!!!</h1>
 
 {% if user.is_authenticated %}
@@ -10,5 +13,4 @@
 <a href="/register/">Register Here</a><br/>
 {% endif %}
 
-
-<p>always</p>
+{% endblock %}
