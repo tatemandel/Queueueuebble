@@ -89,7 +89,6 @@ def dashboard(request):
   if request.method == 'POST':
     queuename = request.POST['queuename']
     queues = len(Queue.objects.filter(name=queuename, owner=puser))
-    print queues
     if queues == 0:
       queue = Queue(name=queuename, creator=puser)
       queue.save()
@@ -146,10 +145,16 @@ def profile_id(request, username, uid):
       nodes = list(Node.objects.filter(queue=queue))
     if 'removeMyself' in request.POST:
       if not user_node == None:
+        del_pos = user_node.position
+        print del_pos
         user_node.delete()
         queue.size = queue.size - 1
         queue.save()
         nodes = list(Node.objects.filter(queue=queue))
+        for n in nodes:
+          if n.position > del_pos:
+            n.position = n.position - 1
+            n.save()
         nodes.sort(key=lambda x: x.position)
       contains = False
     if 'removeFromMyQueue' in request.POST:
@@ -160,6 +165,7 @@ def profile_id(request, username, uid):
         uRemoveNodes = Node.objects.filter(queue=queue,user=uRemoveProf)
         if not len(uRemoveNodes) == 0:
           uRemoveNode = uRemoveNodes[0];
+          uRemovePos = uRemoveNode.position
           uRemoveNode.delete();
           queue.size = queue.size - 1
           if queue.size>0:
@@ -167,6 +173,10 @@ def profile_id(request, username, uid):
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [uNextUser.email], fail_silently=False)
           queue.save();
           nodes = list(Node.objects.filter(queue=queue))
+          for n in nodes:
+            if n.position > uRemovePos:
+              n.position = n.position - 1
+              n.save()
           nodes.sort(key=lambda x: x.position)
     if 'reorderQueue' in request.POST:
       ns = request.POST.get('reorderData').split(',')
@@ -179,6 +189,18 @@ def profile_id(request, username, uid):
         no.position = i
         no.save()
         i = i + 1
+    if 'changeStatus' in request.POST:
+      userNameS = request.POST.get('statusChangeUser')
+      if not userNameS == None:
+        userS = User.objects.get(username=userNameS)
+        userSProf = UserProfile.objects.get(user=userS)
+        userSNodes = Node.objects.filter(queue=queue,user=userSProf)
+        if not len(userSNodes) == 0:
+          userSNode = userSNodes[0];
+          userSNode.status = userSNode.status + 1;
+          userSNode.save()
+          nodes = list(Node.objects.filter(queue=queue))
+          nodes.sort(key=lambda x: x.position)
 
   users_nodes = Node.objects.filter(queue=queue, user=p)
   user_node = None
