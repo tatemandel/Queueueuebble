@@ -166,6 +166,7 @@ def profile_id(request, username, uid):
           nodes.sort(key=lambda x: x.position)
     if 'reorderQueue' in request.POST:
       print 'reorder'
+      print request.POST.get('reorderData')
 
   users_nodes = Node.objects.filter(queue=queue, user=p)
   user_node = None

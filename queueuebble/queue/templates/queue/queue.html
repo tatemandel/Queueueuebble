@@ -61,6 +61,7 @@
       {% endif %}
     {% endfor %}
     {% if not qsize == 0 %}
+      <input type="hidden" name="reorderData" id="reorderData"/>
       <input type="submit" name="reorderQueue" value="Submit Reordering"/>
     {% endif %}
   </ul>
@@ -76,26 +77,9 @@
             datas[i] = $(this).attr('user');
             i++;
         });
-       /*
-        $.ajax({
-            type: "POST",
-            data: { 
-                'sort[]': datas, 
-                'csrfmiddlewaretoken': '{{csrf_token}}'
-            }, 
-            url:"/pets/sort/",
-            contentType: "application/json;charset=utf-8",
-            dataType: "json",
-            success: function(data) { 
-                //Successfully updating the order.
-            },
-            error: function(ts) { 
-                //get the full details of the error
-                alert(ts.responseText);
-            }
-        }); */
 
-     	console.log(datas);
+     	$('#reorderData')[0].value = datas;
+
     });
    });
   </script>
