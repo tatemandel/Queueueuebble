@@ -122,6 +122,18 @@ action="/profile/{{ username }}/{{ uid }}/">
       {{ n.user }}, Status: {{ n.getStatus }}
       {% if myqueue %}
       </br>
+      <form id="change_status_form" method="post" 
+      action="/profile/{{ username }}/{{ uid }}/">
+        {% csrf_token %}
+	{% if n.getStatus == "Not started" %}
+          <input type="submit" name="changeStatus" value="Change to in progess"/>
+	{% elif n.getStatus == "In progress" %}
+	  <input type="submit" name="changeStatus" value="Change to completed"/>
+	{% else %}
+	  <input type="hidden" name="changeStatus">
+	{% endif %}
+	<input type="hidden" name="statusChangeUser" value="{{ n.user }}"/>
+      </form>
       <form id="remove_from_myqueue_form" method="post" 
       action="/profile/{{ username }}/{{ uid }}/">
         {% csrf_token %}

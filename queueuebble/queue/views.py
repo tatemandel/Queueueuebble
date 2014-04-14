@@ -179,6 +179,18 @@ def profile_id(request, username, uid):
         no.position = i
         no.save()
         i = i + 1
+    if 'changeStatus' in request.POST:
+      userNameS = request.POST.get('statusChangeUser')
+      if not userNameS == None:
+        userS = User.objects.get(username=userNameS)
+        userSProf = UserProfile.objects.get(user=userS)
+        userSNodes = Node.objects.filter(queue=queue,user=userSProf)
+        if not len(userSNodes) == 0:
+          userSNode = userSNodes[0];
+          userSNode.status = userSNode.status + 1;
+          userSNode.save()
+          nodes = list(Node.objects.filter(queue=queue))
+          nodes.sort(key=lambda x: x.position)
 
   users_nodes = Node.objects.filter(queue=queue, user=p)
   user_node = None
