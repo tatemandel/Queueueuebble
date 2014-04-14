@@ -169,7 +169,7 @@ def profile_id(request, username, uid):
           uRemoveNode.delete();
           queue.size = queue.size - 1
           if queue.size>0:
-            uNextUser = User.objects.get(username=uRemoveNodes[0])
+            uNextUser = User.objects.get(username=uRemoveNodes[1])
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [uNextUser.email], fail_silently=False)
           queue.save();
           nodes = list(Node.objects.filter(queue=queue))
