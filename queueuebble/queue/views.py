@@ -129,3 +129,4 @@ def profile_id(request, username, uid):
     user_node = users_nodes[0]
 
   return render(request, 'queue/queue.html', locals())
+
