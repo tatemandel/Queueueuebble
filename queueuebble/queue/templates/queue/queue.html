@@ -47,7 +47,7 @@
     }
     
     li.highlight {
-      background: #FEE25F;
+      background: #FDEFC8;
     }
     
     li.sortable-placeholder {
@@ -64,11 +64,11 @@
   
 </head>
 <h1>
-  {{ username }}'s Queue
+  {{ queue.name }}
 </h1>
 
 <h3>
-  {{ queue.name }}
+  {{ username }}'s Queue
 </h3>
 
 {% if not myqueue %}
@@ -109,7 +109,7 @@ action="/profile/{{ username }}/{{ uid }}/">
   <ul id="sortable1" class="sortable list">
     {% for n in nodes %}
     {% if n == user_node %}
-    <li draggable="true" user="{{ n.user }}">
+    <li draggable="true" user="{{ n.user }}" class="highlight">
       <strong>{{ n.user }}, Status: {{ n.getStatus }}</strong>
       <form id="remove_myself_form" method="post" 
       action="/profile/{{ username }}/{{ uid }}/">
@@ -134,12 +134,10 @@ action="/profile/{{ username }}/{{ uid }}/">
     {% endif %}
     {% endfor %}
     {% if not qsize == 0 %}
-    <input type="hidden" name="reorderData" id="reorderData"/>
+    <input draggable='false' type="hidden" name="reorderData" id="reorderData"/>
+    <input draggable='false' type="submit" name="reorderQueue" value="Submit Reordering"/>
     {% endif %}
   </ul>
-  {% if myqueue %}
-   <input type="submit" name="reorderQueue" value="Submit Reordering"/>
-  {% endif %}
    <script>
     $(function(){
       $('#sortable1').sortable();
