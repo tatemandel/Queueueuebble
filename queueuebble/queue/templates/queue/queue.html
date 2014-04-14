@@ -110,19 +110,18 @@ action="/profile/{{ username }}/{{ uid }}/">
     {% for n in nodes %}
     {% if n == user_node %}
     <li draggable="true" user="{{ n.user }}">
-      <strong>
-        {{ n.user }}
-      </strong>
-	  <form id="remove_myself_form" method="post" 
+      <strong>{{ n.user }}, Status: {{ n.getStatus }}</strong>
+      <form id="remove_myself_form" method="post" 
       action="/profile/{{ username }}/{{ uid }}/">
         {% csrf_token %}
         <input type="submit" name="removeMyself" value="Remove myself from this queue"/>
       </form>
     </li>
     {% else %}
-	<li draggable="true" user="{{ n.user }}" >
-      {{ n.user }}
-	  {% if myqueue %}
+    <li draggable="true" user="{{ n.user }}" >
+      {{ n.user }}, Status: {{ n.getStatus }}
+      {% if myqueue %}
+      </br>
       <form id="remove_from_myqueue_form" method="post" 
       action="/profile/{{ username }}/{{ uid }}/">
         {% csrf_token %}
@@ -136,10 +135,12 @@ action="/profile/{{ username }}/{{ uid }}/">
     {% endfor %}
     {% if not qsize == 0 %}
     <input type="hidden" name="reorderData" id="reorderData"/>
-    <input type="submit" name="reorderQueue" value="Submit Reordering"/>
     {% endif %}
   </ul>
-  <script>
+  {% if myqueue %}
+   <input type="submit" name="reorderQueue" value="Submit Reordering"/>
+  {% endif %}
+   <script>
     $(function(){
       $('#sortable1').sortable();
       

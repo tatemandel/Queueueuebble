@@ -33,9 +33,15 @@ class Node(models.Model):
   queue = models.ForeignKey(Queue)
   user = models.ForeignKey(UserProfile)
   position = models.IntegerField(default=0)
+  status = models.IntegerField(default=0)
 
   def __unicode__(self):
     return self.user.user.username
+
+  def getStatus(self):
+    if self.status == 0: return "Not started"
+    elif self.status == 1: return "In progress"
+    else: return 'Completed'
 
   class Meta:
     ordering = ('queue', 'position', 'user')
