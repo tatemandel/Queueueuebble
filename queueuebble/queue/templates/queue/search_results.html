@@ -1,0 +1,25 @@
+<p>You searched for: <strong>{{ query }}</strong></p>
+
+{% if queues %}
+  <p>Found {{ queues|length }} queue{{ queues|pluralize }}.</p>
+  <ul>
+    {% for queue in queues %}
+    <li>
+      <a href="/profile/{{ queue.creator.user.username }}/{{ queue.id }}/">
+        {{ queue.name }}
+      </a>
+    </li>
+    {% endfor %}
+  </ul><br/>
+{% endif %}
+{% if users %}
+  <p>Found {{ users|length }} user{{ users|pluralize }}.</p>
+  <ul>
+    {% for u in users %}
+    <li><a href="/profile/{{ u.username }}/">{{ u.username }}</a></li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% if not queues and not users %}
+  <p>No results found</p>
+{% endif %}

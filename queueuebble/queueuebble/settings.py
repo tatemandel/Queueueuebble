@@ -90,7 +90,8 @@ DATABASES = {
 #         'NAME': 'queueuebble',
 #         'USER': 'queue_admin',
 #         'PASSWORD': 'abc123'
-#     }
+ 
+#    }
 # }
 
 # Internationalization

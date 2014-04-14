@@ -1,23 +1,163 @@
-<h1>{{ username }}'s Queue</h1>
+<head>
+  <style>
+    header, section {
+      display: block;
+    }
+    body {
+      font-family: 'Droid Serif';
+    }
+    h1, h2 {
+      text-align: center;
+      font-weight: normal;
+    }
+    #features {
+      margin: auto;
+      width: 460px;
+      font-size: 0.9em;
+    }
+    .connected, .sortable, .exclude, .handles {
+      margin: auto;
+      padding: 0;
+      width: 310px;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    .sortable.grid {
+      overflow: hidden;
+    }
+    .connected li, .sortable li, .exclude li, .handles li {
+      list-style: none;
+      border: 1px solid #CCC;
+      background: #F6F6F6;
+      font-family: "Tahoma";
+      color: #1C94C4;
+      margin: 5px;
+      padding: 5px;
+      height: 22px;
+    }
+    .handles span {
+      cursor: move;
+    }
+    li.disabled {
+      opacity: 0.5;
+    }
+    
+    li.highlight {
+      background: #FEE25F;
+    }
+    
+    li.sortable-placeholder {
+      border: 1px dashed #CCC;
+      background: none;
+    }
+  </style>
+  <link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
+  
+  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js">
+  </script>
+  <script type="text/javascript" src="http://farhadi.ir/projects/html5sortable/jquery.sortable.js">
+  </script>
+  
+</head>
+<h1>
+  {{ username }}'s Queue
+</h1>
 
-<h2>{{ queue.name }}</h2>
-{% if not contains %}
-  <form id="add_to_queue_form" method="post" 
-        action="/profile/{{ username }}/{{ uid }}">
-    {% csrf_token %}
-    <input type="submit" value="Add myself to this queue"/>
-  </form>
+<h3>
+  {{ queue.name }}
+</h3>
+
+{% if not myqueue %}
+{% if fav %}
+<form method="post" id="remove_favorite" action="/profile/{{ username }}/{{ uid }}/">
+  {% csrf_token %}
+  <input type="submit" name="removeFavorite" value="Remove from Favorites"/>
+</form>
+{% else %}
+<form method="post" id="add_favorite" action="/profile/{{ username }}/{{ uid }}/">
+  {% csrf_token %}
+  <input type="submit" name="addFavorite" value="Add to Favorites"/>
+</form>
+{% endif %}
+{% endif %}
+
+{% if not contains and not myqueue %}
+<form id="add_to_queue_form" method="post" 
+action="/profile/{{ username }}/{{ uid }}/">
+  {% csrf_token %}
+  <input type="submit" name="addMyself" value="Add myself to this queue"/>
+</form>
 {% endif %}
 
 {% if contains %}
-<h4> There are {{ user_node.position }} people in front of you </h4>
+{% if user_node.position == 1 %}
+<h4>
+  There is {{ user_node.position }} person in front of you.
+</h4>
+{% else %}
+<h4>
+  There are {{ user_node.position }} people in front of you.
+</h4>
+{% endif %}
 {% endif %}
 
-{% for n in nodes %}
-  {% if n == user_node %}
-    <strong>{{ n.user }}</strong><br/>
-  {% else %}
-    {{ n.user }}<br/>
-  {% endif %}
-{% endfor %}
-
+<form id="reorder" method="post" action="/profile/{{ username }}/{{ uid }}/">
+  <ul id="sortable1" class="sortable list">
+    {% for n in nodes %}
+    {% if n == user_node %}
+    <li draggable="true" user="{{ n.user }}">
+      <strong>
+        {{ n.user }}
+      </strong>
+	  <form id="remove_myself_form" method="post" 
+      action="/profile/{{ username }}/{{ uid }}/">
+        {% csrf_token %}
+        <input type="submit" name="removeMyself" value="Remove myself from this queue"/>
+      </form>
+    </li>
+    {% else %}
+	<li draggable="true" user="{{ n.user }}" >
+      {{ n.user }}
+	  {% if myqueue %}
+      <form id="remove_from_myqueue_form" method="post" 
+      action="/profile/{{ username }}/{{ uid }}/">
+        {% csrf_token %}
+        <input type="hidden" name="nodeToRemove2" value="{{ n.user }}"/>
+        <input type="submit" name="removeFromMyQueue" value="Remove this person from my Queue"/>
+      </form>
+      {% endif %}
+      <br/>
+    </li>
+    {% endif %}
+    {% endfor %}
+    {% if not qsize == 0 %}
+    <input type="hidden" name="reorderData" id="reorderData"/>
+    <input type="submit" name="reorderQueue" value="Submit Reordering"/>
+    {% endif %}
+  </ul>
+  <script>
+    $(function(){
+      $('#sortable1').sortable();
+      
+      $('.sortable').sortable().bind('sortupdate', function() {
+        datas = new Array();
+        var i = 0;
+        
+        $('#sortable1 li').each(function() {
+          datas[i] = $(this).attr('user');
+          i++;
+        }
+                               );
+        
+        $('#reorderData')[0].value = datas;
+        
+      }
+                                    );
+    }
+     );
+  </script>
+</form>

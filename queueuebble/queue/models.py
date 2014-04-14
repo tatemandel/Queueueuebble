@@ -3,12 +3,11 @@ from django.contrib.auth.models import User
 
 class UserProfile(models.Model):
   user = models.ForeignKey(User)
+  visited = models.ManyToManyField('Queue', related_name="visited")
+  favorites = models.ManyToManyField('Queue', related_name="favorites")
 
   def __unicode__(self):
     return self.user.username
-
-  def dostuff(self):
-    return "hey"
 
   class Meta:
     ordering = ('user',)
@@ -16,15 +15,16 @@ class UserProfile(models.Model):
 class Queue(models.Model):
   name = models.CharField(max_length=50)
   size = models.IntegerField(default=0)
+  creator = models.ForeignKey(UserProfile, related_name="creator")
   owner = models.ManyToManyField(UserProfile)
   
   def __unicode__(self):
     return self.name
 
-  def contains(self, userprof):
-    nodes = list(self.node_set.all());
+  def contains(self, userProf):
+    nodes = list(self.node_set.all())
     nodeUsers = map((lambda n: n.user), nodes)
-    return userprof in nodeUsers
+    return userProf in nodeUsers
 
   class Meta:
     ordering = ('name',)
@@ -38,4 +38,4 @@ class Node(models.Model):
     return self.user.user.username
 
   class Meta:
-    ordering = ('queue', 'user')
+    ordering = ('queue', 'position', 'user')

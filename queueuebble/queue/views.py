@@ -82,14 +82,24 @@ def user_logout(request):
 def dashboard(request):
   context = RequestContext(request)
   puser = UserProfile.objects.get(user=request.user)
+  exists = False
+  queuename = None
 
   if request.method == 'POST':
     queuename = request.POST['queuename']
-    queue = Queue(name=queuename)
-    queue.save()
-    queue.owner.add(puser)
+    queues = len(Queue.objects.filter(name=queuename, owner=puser))
+    print queues
+    if queues == 0:
+      queue = Queue(name=queuename, creator=puser)
+      queue.save()
+      queue.owner.add(puser)
+      queue.save()
+    else:
+      exists = True
 
   owned = Queue.objects.filter(owner=puser)
+  favorites = puser.favorites.all()
+  visited = puser.visited.all()
   qin = []
   for n in Node.objects.filter(user=puser):
     qin.append(n.queue)
@@ -100,7 +110,6 @@ def profile(request, username):
   puser = UserProfile.objects.get(user=u)
   owned = Queue.objects.filter(owner=puser)
 
-  print username
   return render(request, 'queue/profile.html', locals())
 
 @login_required
@@ -112,21 +121,79 @@ def profile_id(request, username, uid):
   nodes.sort(key=lambda x: x.position)
   qsize = queue.size
   p = UserProfile.objects.get(user=request.user)
-
+  myqueue = p == puser
   contains = queue.contains(p)
-  if request.method == 'POST' and not queue.contains(p):
-    node = Node(user=p, queue=queue, position=qsize)
-    queue.size = qsize + 1
-    queue.save()
-    node.save()
-    contains = True
-    print queue.size
+  users_nodes = Node.objects.filter(queue=queue, user=p)
+  user_node = None
+  fav = queue in p.favorites.all()
+  if not len(users_nodes) == 0:
+    user_node = users_nodes[0]
+
+  if request.method == 'POST':
+    if 'addFavorite' in request.POST:
+      p.favorites.add(queue)
+      fav = True
+    if 'removeFavorite' in request.POST:
+      p.favorites.remove(queue)
+      fav = False
+    if ('addMyself' in request.POST) and not queue.contains(p):
+      node = Node(user=p, queue=queue, position=qsize)
+      queue.size = qsize + 1
+      queue.save()
+      node.save()
+      contains = True
+      nodes = list(Node.objects.filter(queue=queue))
+    if 'removeMyself' in request.POST:
+      if not user_node == None:
+        user_node.delete()
+        queue.size = queue.size - 1
+        queue.save()
+        nodes = list(Node.objects.filter(queue=queue))
+        nodes.sort(key=lambda x: x.position)
+      contains = False
+    if 'removeFromMyQueue' in request.POST:
+      uRemoveName = request.POST.get('nodeToRemove2')
+      if not uRemoveName == None:
+        uRemoveUser = User.objects.get(username=uRemoveName)
+        uRemoveProf = UserProfile.objects.get(user=uRemoveUser)
+        uRemoveNodes = Node.objects.filter(queue=queue,user=uRemoveProf)
+        if not len(uRemoveNodes) == 0:
+          uRemoveNode = uRemoveNodes[0];
+          uRemoveNode.delete();
+          queue.size = queue.size - 1
+          if queue.size>0:
+            uNextUser = User.objects.get(username=uRemoveNodes[0])
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [uNextUser.email], fail_silently=False)
+          queue.save();
+          nodes = list(Node.objects.filter(queue=queue))
+          nodes.sort(key=lambda x: x.position)
+    if 'reorderQueue' in request.POST:
+      ns = request.POST.get('reorderData').split(',')
+      nodes = Node.objects.filter(queue=queue)
+      i = 0
+      for user_name in ns:
+        user_object = User.objects.get(username=user_name)
+        up_object = UserProfile.objects.get(user=user_object)
+        no = nodes.get(user=up_object)
+        no.position = i
+        no.save()
+        i = i + 1
 
   users_nodes = Node.objects.filter(queue=queue, user=p)
-
   user_node = None
   if not len(users_nodes) == 0:
     user_node = users_nodes[0]
 
   return render(request, 'queue/queue.html', locals())
 
+def search_form(request):
+  return render(request, 'queue/search_form.html')
+
+def search(request):
+  if 'q' in request.GET and request.GET['q']:
+    q = request.GET['q']
+    queues = Queue.objects.filter(name__icontains=q)
+    users = User.objects.filter(username__icontains=q)
+    return render(request, 'queue/search_results.html', {'queues': queues, 'users': users, 'query': q})
+  else:
+    return HttpResponse('Submit a search term')
