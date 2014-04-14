@@ -41,6 +41,30 @@ class DashboardTests(TestCase):
     response = self.client.get(reverse('dashboard'))
     self.assertEqual(response.status_code, 200)
 
+  def test_dashboard_create_queue_exists(self):
+    response = self.client.post(reverse('dashboard'),
+                                { 'queuename' : 'test_queue',
+                                  'user' : self.user
+                                })
+    qs = Queue.objects.filter(creator=self.user, name='test_queue')
+    self.assertTrue(len(qs) == 1)
+        
+  def test_dashboard_search_redirects(self):
+    response = self.client.get(reverse('search'),
+                               { 'q' : 'test_query' })
+    self.assertEqual(response.status_code, 200)
+
+  def test_dashboard_search_empty_results(self):
+    response = self.client.get(reverse('search'),
+                               { 'q' : 'test_query' })
+    self.assertTrue("No results found" in response.content)
+
+  def test_dashboard_search_user_exists(self):
+    response = self.client.get(reverse('search'),
+                               { 'q' : 'test' })
+    self.assertTrue("Found 1 user" in response.content)
+    self.assertTrue(" queue" not in response.content)
+
 class RegisterTests(TestCase):
   def test_registration_logs_in(self):
     response = self.client.post(reverse('register'),

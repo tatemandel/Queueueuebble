@@ -89,7 +89,6 @@ def dashboard(request):
   if request.method == 'POST':
     queuename = request.POST['queuename']
     queues = len(Queue.objects.filter(name=queuename, owner=puser))
-    print queues
     if queues == 0:
       queue = Queue(name=queuename, creator=puser)
       queue.save()
