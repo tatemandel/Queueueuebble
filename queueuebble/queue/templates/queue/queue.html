@@ -105,7 +105,9 @@ action="/profile/{{ username }}/{{ uid }}/">
 {% endif %}
 {% endif %}
 
+{% if myqueue %}
 <form id="reorder" method="post" action="/profile/{{ username }}/{{ uid }}/">
+{% endif %}
   <ul id="sortable1" class="sortable list">
     {% for n in nodes %}
     {% if n == user_node %}
@@ -145,13 +147,14 @@ action="/profile/{{ username }}/{{ uid }}/">
     </li>
     {% endif %}
     {% endfor %}
-    {% if not qsize == 0 %}
+    {% if not qsize == 0 and myqueue %}
     <input draggable='false' type="hidden" name="reorderData" id="reorderData"/>
     <input draggable='false' type="submit" name="reorderQueue" value="Submit Reordering"/>
     {% endif %}
   </ul>
+ {% if myqueue %}
    <script>
-    $(function(){
+    $(function() {
       $('#sortable1').sortable();
       
       $('.sortable').sortable().bind('sortupdate', function() {
@@ -161,14 +164,12 @@ action="/profile/{{ username }}/{{ uid }}/">
         $('#sortable1 li').each(function() {
           datas[i] = $(this).attr('user');
           i++;
-        }
-                               );
-        
+        });
+
         $('#reorderData')[0].value = datas;
         
-      }
-                                    );
-    }
-     );
+      });
+    });
   </script>
 </form>
+{% endif %}

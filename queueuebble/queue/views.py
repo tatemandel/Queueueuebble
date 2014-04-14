@@ -35,7 +35,7 @@ def register(request):
       registered = True
 
       #send confirmation mail
-      send_mail('Welcome to queueubble!', 'Sup niggs.', 'jonathanp.chen@gmail.com', [user.email], fail_silently=False)
+      send_mail('Welcome to queueubble!', 'Thanks for registering.', 'jonathanp.chen@gmail.com', [user.email], fail_silently=False)
     else:
       print user_form.errors, profile_form.errors
 
