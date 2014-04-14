@@ -1,5 +1,5 @@
 <head>
-  <script type="text/javascript" src="http://farhadi.ir/projects/html5sortable/jquery-1.7.1.min.js"></script>
+  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
   <script type="text/javascript" src="http://farhadi.ir/projects/html5sortable/jquery.sortable.js"></script>  
 </head>
 <h1>{{ username }}'s Queue</h1>
@@ -36,11 +36,11 @@
   {% endif %}
 {% endif %}
 
-<form id="reorder" method="post" action="/profile/{{ username }}/{{ uid }}">
+<form id="reorder" method="post" action="/profile/{{ username }}/{{ uid }}/">
   <ul id="sortable1" class="sortable list">
     {% for n in nodes %}
       {% if n == user_node %}
-        <li draggable="true"><strong>{{ n.user }}</strong>
+        <li draggable="true" user="{{ n.user }}"><strong>{{ n.user }}</strong>
 	  <form id="remove_myself_form" method="post" 
           action="/profile/{{ username }}/{{ uid }}/">
 	    {% csrf_token %}
@@ -48,7 +48,7 @@
 	  </form>
           <br/></li>
       {% else %}
-	<li draggable="true">{{ n.user }} 
+	<li draggable="true" user="{{ n.user }}" > {{ n.user }}
 	  {% if myqueue %}
             <form id="remove_from_myqueue_form" method="post" 
               action="/profile/{{ username }}/{{ uid }}/">
@@ -67,6 +67,36 @@
 <script>
    $(function(){
      $('#sortable1').sortable();
+
+     $('.sortable').sortable().bind('sortupdate', function() {
+        datas = new Array();
+        var i = 0;
+       
+        $('#sortable1 li').each(function() {
+            datas[i] = $(this).attr('user');
+            i++;
+        });
+       /*
+        $.ajax({
+            type: "POST",
+            data: { 
+                'sort[]': datas, 
+                'csrfmiddlewaretoken': '{{csrf_token}}'
+            }, 
+            url:"/pets/sort/",
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function(data) { 
+                //Successfully updating the order.
+            },
+            error: function(ts) { 
+                //get the full details of the error
+                alert(ts.responseText);
+            }
+        }); */
+
+     	console.log(datas);
+    });
    });
   </script>
 </form>
