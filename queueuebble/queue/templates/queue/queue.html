@@ -70,6 +70,20 @@
 <h3>
   {{ username }}'s Queue
 </h3>
+<h3>Owners</h3>
+<ul>
+  {% for owner in owners %}
+    <li>{{ owner.user.username }}</li>
+  {% endfor %}
+</ul>
+{% if myqueue %}
+  <h3>Add Owner</h3>
+  <form method="post" id="add_owner" action="/profile/{{ username }}/{{ uid }}/">
+    {% csrf_token %}
+    Username: <input type="text" name="newowner"/>
+    <input type="submit" name="addOwner" value="Submit">
+  </form>
+{% endif %}
 
 {% if not myqueue %}
 {% if fav %}

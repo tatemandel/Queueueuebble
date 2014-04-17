@@ -121,7 +121,7 @@ def profile_id(request, username, uid):
   nodes.sort(key=lambda x: x.position)
   qsize = queue.size
   p = UserProfile.objects.get(user=request.user)
-  myqueue = p == puser
+  myqueue = p in queue.owner.all()
   contains = queue.contains(p)
   users_nodes = Node.objects.filter(queue=queue, user=p)
   user_node = None
@@ -201,16 +201,20 @@ def profile_id(request, username, uid):
           userSNode.save()
           nodes = list(Node.objects.filter(queue=queue))
           nodes.sort(key=lambda x: x.position)
+    if 'addOwner' in request.POST:
+      usernameO = request.POST.get('newowner')
+      if User.objects.filter(username=usernameO):
+        userO = User.objects.get(username=usernameO)
+        userOProf = UserProfile.objects.get(user=userO)
+        queue.owner.add(userOProf)
+        queue.save()
 
   users_nodes = Node.objects.filter(queue=queue, user=p)
+  owners = queue.owner.all()
   user_node = None
   if not len(users_nodes) == 0:
     user_node = users_nodes[0]
-
   return render(request, 'queue/queue.html', locals())
-
-def search_form(request):
-  return render(request, 'queue/search_form.html')
 
 def search(request):
   if 'q' in request.GET and request.GET['q']:
