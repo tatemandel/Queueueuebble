@@ -87,15 +87,21 @@ def dashboard(request):
   queuename = None
 
   if request.method == 'POST':
-    queuename = request.POST['queuename']
-    queues = len(Queue.objects.filter(name=queuename, owner=puser))
-    if queues == 0:
-      queue = Queue(name=queuename, creator=puser)
-      queue.save()
-      queue.owner.add(puser)
-      queue.save()
-    else:
-      exists = True
+    if 'createQueue' in request.POST:
+      queuename = request.POST['queuename']
+      queues = len(Queue.objects.filter(name=queuename, owner=puser))
+      if queues == 0:
+        queue = Queue(name=queuename, creator=puser)
+        queue.save()
+        queue.owner.add(puser)
+        queue.save()
+      else:
+        exists = True
+    if 'closeOpen' in request.POST:
+      queueid = request.POST['queueid']
+      queue_to_close = Queue.objects.get(id=queueid)
+      queue_to_close.closed = not queue_to_close.closed
+      queue_to_close.save()
 
   owned = Queue.objects.filter(owner=puser)
   favorites = puser.favorites.all()
@@ -208,6 +214,9 @@ def profile_id(request, username, uid):
         userOProf = UserProfile.objects.get(user=userO)
         queue.owner.add(userOProf)
         queue.save()
+    if 'openClose' in request.POST:
+      queue.closed = not queue.closed
+      queue.save()
 
   users_nodes = Node.objects.filter(queue=queue, user=p)
   owners = queue.owner.all()

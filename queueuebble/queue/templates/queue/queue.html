@@ -67,9 +67,24 @@
   {{ queue.name }}
 </h1>
 
-<h3>
-  {{ username }}'s Queue
-</h3>
+<h3>{{ username }}'s Queue</h3>
+{% if queue.closed %}
+  <p>This queue is closed</p>
+{% else %}
+  <p>This queue is open</p>
+{% endif %}
+
+{% if myqueue %}
+  <form method="post" id="open_close" action="/profile/{{ username }}/{{ uid }}/">
+    {% csrf_token %}
+    {% if queue.closed %}
+      <input type="submit" name="openClose" value="Open Queue">
+    {% else %}
+      <input type="submit" name="openClose" value="Close Queue">
+    {% endif %}
+  </form>
+{% endif %}
+
 <h3>Owners</h3>
 <ul>
   {% for owner in owners %}
@@ -99,9 +114,8 @@
 {% endif %}
 {% endif %}
 
-{% if not contains and not myqueue %}
-<form id="add_to_queue_form" method="post" 
-action="/profile/{{ username }}/{{ uid }}/">
+{% if not contains and not myqueue and not queue.closed %}
+<form id="add_to_queue_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
   {% csrf_token %}
   <input type="submit" name="addMyself" value="Add myself to this queue"/>
 </form>

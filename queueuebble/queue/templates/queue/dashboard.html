@@ -6,15 +6,28 @@
 
 <div>
     <h2>Queues Owned</h2>
-    {% for q in owned %}
-    <a href="/profile/{{ q.creator.user.username }}/{{ q.id }}/">{{ q.name }}</a><br/>
-    {% endfor %}
+    <ul>
+      {% for q in owned %}
+        <li>
+          <a href="/profile/{{ q.creator.user.username }}/{{ q.id }}/">{{ q.name }}</a><br/>
+          <form id="open_close_queue" method="post" action="/dashboard/">
+            {% csrf_token %}
+            <input type="hidden" name="queueid" value="{{ q.id }}"/>
+            {% if q.closed %}
+              <input type="submit" name="closeOpen" value="Open Queue"/>
+            {% else %}
+              <input type="submit" name="closeOpen" value="Close Queue"/>
+            {% endif %}
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
 </div>
 <form id="add_queue_form" method="post" action="/dashboard/">
     {% csrf_token %}
     <h3>Create Queue</h3>
     Queue Name: <input type="text" name="queuename"/> 
-    <input type="submit" value="Submit"/>
+    <input type="submit" name="createQueue" value="Submit"/>
 </form>
 <div>
     <h2>Queues In</h2>
