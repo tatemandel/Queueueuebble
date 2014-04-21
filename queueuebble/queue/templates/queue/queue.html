@@ -111,88 +111,106 @@
 
 {% if not myqueue %}
   {% if fav %}
-  <form method="post" id="remove_favorite" action="/profile/{{ username }}/{{ uid }}/">
-  {% csrf_token %}
-  <input type="submit" name="removeFavorite" value="Remove from Favorites"/>
-  </form>
+    <form method="post" id="remove_favorite" action="/profile/{{ username }}/{{ uid }}/">
+      {% csrf_token %}
+      <input type="submit" name="removeFavorite" value="Remove from Favorites"/>
+    </form>
   {% else %}
-  <form method="post" id="add_favorite" action="/profile/{{ username }}/{{ uid }}/">
-  {% csrf_token %}
-  <input type="submit" name="addFavorite" value="Add to Favorites"/>
-  </form>
+    <form method="post" id="add_favorite" action="/profile/{{ username }}/{{ uid }}/">
+      {% csrf_token %}
+      <input type="submit" name="addFavorite" value="Add to Favorites"/>
+    </form>
   {% endif %}
 {% endif %}
 
 {% if not contains and not myqueue and not queue.closed %}
-<form id="add_to_queue_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
-  {% csrf_token %}
-  <input type="submit" name="addMyself" value="Add myself to this queue"/>
-</form>
+  <form id="add_to_queue_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
+    {% csrf_token %}
+    <input type="submit" name="addMyself" value="Add myself to this queue"/>
+  </form>
 {% endif %}
 
 {% if contains %}
   {% if user_node.position == 1 %}
-  <h4>
-    There is {{ user_node.position }} person in front of you.
-  </h4>
+    <h4>There is {{ user_node.position }} person in front of you.</h4>
   {% else %}
-  <h4>
-    There are {{ user_node.position }} people in front of you.
-  </h4>
+    <h4>There are {{ user_node.position }} people in front of you.</h4>
   {% endif %}
 {% endif %}
 
-<form id="reorder" method="post" action="/profile/{{ username }}/{{ uid }}/">
-  <ul id="sortable1" class="sortable list">
-    {% for n in nodes %}
+<ul id="sortable1" class="sortable list">
+  {% for n in nodes %}
     {% if n == user_node %}
-    <li draggable="true" user="{{ n.user }}" class="highlight">
-      <strong>{{ n.user }}</strong>
-      <br> <label class='status'> status: {{ n.getStatus }} </label>
-      <form id="remove_myself_form" method="post" 
-      action="/profile/{{ username }}/{{ uid }}/">
-        {% csrf_token %}
-        <input type="submit" name="removeMyself" value="Remove myself from this queue"/>
-      </form>
-    </li>
+      <li draggable="true" user="{{ n.user }}" class="highlight">
+        <strong>{{ n.user }}</strong>
+        <br> <label class='status'> status: {{ n.getStatus }} </label>
+        <form id="remove_myself_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
+          {% csrf_token %}
+          <input type="submit" name="removeMyself" value="Remove myself from this queue"/>
+        </form>
+      </li>
     {% else %}
-    <li draggable="true" user="{{ n.user }}" >
-      {{ n.user }}
-      <br> <label class = 'status'> status: {{n.getStatus}}</label>
-      {% if myqueue %}
-      <form id="change_status_form" method="post" 
-      action="/profile/{{ username }}/{{ uid }}/">
-        {% csrf_token %}
-        {% if n.getStatus == "Not started" %}
-          <input type="submit" name="changeStatus" value="Change to in progess"/>
-        {% elif n.getStatus == "In progress" %}
-          <input type="submit" name="changeStatus" value="Change to completed"/>
-       {% else %}
-         <input type="hidden" name="changeStatus">
-       {% endif %}
-      <input type="hidden" name="statusChangeUser" value="{{ n.user }}"/>
-      </form>
-      <form id="remove_from_myqueue_form" method="post" 
-      action="/profile/{{ username }}/{{ uid }}/">
-        {% csrf_token %}
-        <input type="hidden" name="nodeToRemove2" value="{{ n.user }}"/>
-        <input type="submit" name="removeFromMyQueue" value="Remove this person from my Queue"/>
-      </form>
-      {% endif %}
-    </li>
+      <li draggable="true" user="{{ n.user }}" >
+        {{ n.user }}
+        <br> <label class = 'status'> status: {{n.getStatus}}</label>
+        {% if myqueue %}
+          <form id="change_status_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
+            {% csrf_token %}
+            {% if n.getStatus == "Not started" %}
+              <input type="submit" name="changeStatus" value="Change to in progess"/>
+            {% elif n.getStatus == "In progress" %}
+              <input type="submit" name="changeStatus" value="Change to completed"/>
+            {% else %}
+              <input type="hidden" name="changeStatus">
+            {% endif %}
+            <input type="hidden" name="statusChangeUser" value="{{ n.user }}"/>
+          </form>
+          <form id="remove_from_myqueue_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
+            {% csrf_token %}
+            <input type="hidden" name="nodeToRemove2" value="{{ n.user }}"/>
+            <input type="submit" name="removeFromMyQueue" value="Remove this person from my Queue"/>
+          </form>
+        {% endif %}
+      </li>
     {% endif %}
-    {% endfor %}
-    {% if not qsize == 0 and myqueue %}
-    <input draggable='false' type="hidden" name="reorderData" id="reorderData"/>
-    <input draggable='false' type="submit" name="reorderQueue" value="Submit Reordering"/>
-    {% endif %}
-  </ul>
- {% if myqueue %}
-   <script>
+  {% endfor %}
+  {% if not qsize == 0 and myqueue %}
+  {% endif %}
+</ul>
+<!-- <input draggable='false' type="hidden" name="reorderData" id="reorderData"/> -->
+<input type="submit" id="confirmReorder" value="Submit Reordering"/>
+{% if myqueue %}
+  <script>
     $(function() {
+      $.ajaxSetup({ 
+        beforeSend: function(xhr, settings) {
+          function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+                }
+              }
+            }
+            return cookieValue;
+          }
+          if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+            // Only send the token to relative URLs i.e. locally.
+            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+          }
+        } 
+      });
+
       $('#sortable1').sortable();
-      
-      $('.sortable').sortable().bind('sortupdate', function() {
+     
+      $('#confirmReorder').click(function() {
+
+//    $('.sortable').sortable().bind('sortupdate', function() {
         datas = new Array();
         var i = 0;
         
@@ -200,12 +218,16 @@
           datas[i] = $(this).attr('user');
           i++;
         });
-
-        $('#reorderData')[0].value = datas;
         
+        $.ajax({
+          type: "POST",
+          url: "/profile/{{ username }}/{{ uid }}/",
+          data : { name: "reorderQueue", arr : datas }
+        });
+
       });
+
     });
   </script>
-  {% endif %}
-</form>
+{% endif %}
 

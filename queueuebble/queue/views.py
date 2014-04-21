@@ -118,6 +118,18 @@ def profile(request, username):
 
   return render(request, 'queue/profile.html', locals())
 
+def confirm_reorder(request, queue):
+  arr = request.POST.getlist('arr[]')
+  nodes = Node.objects.filter(queue=queue)
+  i = 0
+  for user_name in arr:
+    user_object = User.objects.get(username=user_name)
+    up_object = UserProfile.objects.get(user=user_object)
+    no = nodes.get(user=up_object)
+    no.position = i
+    no.save()
+    i = i + 1
+
 @login_required
 def profile_id(request, username, uid):
   u = User.objects.get(username=username)
@@ -135,7 +147,13 @@ def profile_id(request, username, uid):
   if not len(users_nodes) == 0:
     user_node = users_nodes[0]
 
-  if request.method == 'POST':
+  # ajax
+  if request.method == 'POST' and request.is_ajax:
+    if request.POST.get('name') == "reorderQueue":
+      confirm_reorder(request, queue)
+
+  # not ajax
+  elif request.method == 'POST':
     if 'addFavorite' in request.POST:
       p.favorites.add(queue)
       fav = True
@@ -184,17 +202,6 @@ def profile_id(request, username, uid):
               n.position = n.position - 1
               n.save()
           nodes.sort(key=lambda x: x.position)
-    if 'reorderQueue' in request.POST:
-      ns = request.POST.get('reorderData').split(',')
-      nodes = Node.objects.filter(queue=queue)
-      i = 0
-      for user_name in ns:
-        user_object = User.objects.get(username=user_name)
-        up_object = UserProfile.objects.get(user=user_object)
-        no = nodes.get(user=up_object)
-        no.position = i
-        no.save()
-        i = i + 1
     if 'changeStatus' in request.POST:
       userNameS = request.POST.get('statusChangeUser')
       if not userNameS == None:
