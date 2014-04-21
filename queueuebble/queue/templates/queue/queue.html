@@ -92,6 +92,10 @@
       <input type="submit" name="openClose" value="Close Queue">
     {% endif %}
   </form>
+  <form method="post" id="destroy_queue" action="/profile/{{ username }}/{{ uid }}/">
+    {% csrf_token %}
+      <input type="submit" name="destroy" value="Destroy Queue">
+  </form>
 {% endif %}
 
 <h3>Owners</h3>
