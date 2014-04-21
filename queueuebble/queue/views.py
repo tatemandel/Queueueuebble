@@ -102,6 +102,10 @@ def dashboard(request):
       queue_to_close = Queue.objects.get(id=queueid)
       queue_to_close.closed = not queue_to_close.closed
       queue_to_close.save()
+    if 'destroy' in request.POST:
+      queueid = request.POST['queueid']
+      queue_to_destroy = Queue.objects.get(id=queueid)
+      queue_to_destroy.delete()
 
   owned = Queue.objects.filter(owner=puser)
   favorites = puser.favorites.all()
@@ -217,6 +221,9 @@ def profile_id(request, username, uid):
     if 'openClose' in request.POST:
       queue.closed = not queue.closed
       queue.save()
+    if 'destroy' in request.POST:
+      queue.delete()
+      return HttpResponseRedirect('/dashboard/')
 
   users_nodes = Node.objects.filter(queue=queue, user=p)
   owners = queue.owner.all()
