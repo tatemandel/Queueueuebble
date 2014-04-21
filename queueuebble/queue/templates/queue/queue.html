@@ -10,6 +10,9 @@
       text-align: center;
       font-weight: normal;
     }
+    form {
+      margin-bottom: 4px;
+    }
     #features {
       margin: auto;
       width: 460px;
@@ -37,7 +40,7 @@
       color: #1C94C4;
       margin: 5px;
       padding: 5px;
-      height: 22px;
+      height: 75px;
     }
     .handles span {
       cursor: move;
@@ -53,6 +56,12 @@
     li.sortable-placeholder {
       border: 1px dashed #CCC;
       background: none;
+    }
+
+    label.status {
+      padding-bottom: 5px;
+      color: #aaaaaa;
+      font-size: 0.7em;
     }
   </style>
   <link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
@@ -101,17 +110,17 @@
 {% endif %}
 
 {% if not myqueue %}
-{% if fav %}
-<form method="post" id="remove_favorite" action="/profile/{{ username }}/{{ uid }}/">
+  {% if fav %}
+  <form method="post" id="remove_favorite" action="/profile/{{ username }}/{{ uid }}/">
   {% csrf_token %}
   <input type="submit" name="removeFavorite" value="Remove from Favorites"/>
-</form>
-{% else %}
-<form method="post" id="add_favorite" action="/profile/{{ username }}/{{ uid }}/">
+  </form>
+  {% else %}
+  <form method="post" id="add_favorite" action="/profile/{{ username }}/{{ uid }}/">
   {% csrf_token %}
   <input type="submit" name="addFavorite" value="Add to Favorites"/>
-</form>
-{% endif %}
+  </form>
+  {% endif %}
 {% endif %}
 
 {% if not contains and not myqueue and not queue.closed %}
@@ -122,25 +131,24 @@
 {% endif %}
 
 {% if contains %}
-{% if user_node.position == 1 %}
-<h4>
-  There is {{ user_node.position }} person in front of you.
-</h4>
-{% else %}
-<h4>
-  There are {{ user_node.position }} people in front of you.
-</h4>
-{% endif %}
+  {% if user_node.position == 1 %}
+  <h4>
+    There is {{ user_node.position }} person in front of you.
+  </h4>
+  {% else %}
+  <h4>
+    There are {{ user_node.position }} people in front of you.
+  </h4>
+  {% endif %}
 {% endif %}
 
-{% if myqueue %}
 <form id="reorder" method="post" action="/profile/{{ username }}/{{ uid }}/">
-{% endif %}
   <ul id="sortable1" class="sortable list">
     {% for n in nodes %}
     {% if n == user_node %}
     <li draggable="true" user="{{ n.user }}" class="highlight">
-      <strong>{{ n.user }}, Status: {{ n.getStatus }}</strong>
+      <strong>{{ n.user }}</strong>
+      <br> <label class='status'> status: {{ n.getStatus }} </label>
       <form id="remove_myself_form" method="post" 
       action="/profile/{{ username }}/{{ uid }}/">
         {% csrf_token %}
@@ -149,20 +157,20 @@
     </li>
     {% else %}
     <li draggable="true" user="{{ n.user }}" >
-      {{ n.user }}, Status: {{ n.getStatus }}
+      {{ n.user }}
+      <br> <label class = 'status'> status: {{n.getStatus}}</label>
       {% if myqueue %}
-      </br>
       <form id="change_status_form" method="post" 
       action="/profile/{{ username }}/{{ uid }}/">
         {% csrf_token %}
-	{% if n.getStatus == "Not started" %}
+        {% if n.getStatus == "Not started" %}
           <input type="submit" name="changeStatus" value="Change to in progess"/>
-	{% elif n.getStatus == "In progress" %}
-	  <input type="submit" name="changeStatus" value="Change to completed"/>
-	{% else %}
-	  <input type="hidden" name="changeStatus">
-	{% endif %}
-	<input type="hidden" name="statusChangeUser" value="{{ n.user }}"/>
+        {% elif n.getStatus == "In progress" %}
+          <input type="submit" name="changeStatus" value="Change to completed"/>
+       {% else %}
+         <input type="hidden" name="changeStatus">
+       {% endif %}
+      <input type="hidden" name="statusChangeUser" value="{{ n.user }}"/>
       </form>
       <form id="remove_from_myqueue_form" method="post" 
       action="/profile/{{ username }}/{{ uid }}/">
@@ -171,7 +179,6 @@
         <input type="submit" name="removeFromMyQueue" value="Remove this person from my Queue"/>
       </form>
       {% endif %}
-      <br/>
     </li>
     {% endif %}
     {% endfor %}
@@ -199,5 +206,6 @@
       });
     });
   </script>
+  {% endif %}
 </form>
-{% endif %}
+
