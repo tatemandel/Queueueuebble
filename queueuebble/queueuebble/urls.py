@@ -3,22 +3,37 @@ from queueuebble.views import hello
 from queue import views
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
+
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'queueuebble.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
-    url(r'^$', views.index, name='index'),
-    url(r'^hello/$', hello),
-    url(r'^admin/', include(admin.site.urls)),
-    url(r'^register/$', views.register, name='register'),
-    url(r'^login/$', views.user_login, name='login'),
-    url(r'^logout/$', views.user_logout, name='logout'),
-    url(r'^dashboard/$', views.dashboard, name='dashboard'),
-    url(r'^profile/(?P<username>[\w\.@+-]+)/$', views.profile, name='profile'),
-    url(r'^profile/(?P<username>[\w\.@+-]+)/(?P<uid>\d+)/$', views.profile_id, name='profile_id'),
-    url(r'^search/$', views.search, name='search')
-)
+        # Examples:
+        # url(r'^$', 'queueuebble.views.home', name='home'),
+        # url(r'^blog/', include('blog.urls')),
+        url(r'^$', views.index, name='index'),
+        url(r'^hello/$', hello),
+        url(r'^admin/', include(admin.site.urls)),
+        url(r'^register/$', views.register, name='register'),
+        url(r'^login/$', views.user_login, name='login'),
+        url(r'^logout/$', views.user_logout, name='logout'),
+        url(r'^dashboard/$', views.dashboard, name='dashboard'),
+        url(r'^profile/(?P<username>[\w\.@+-]+)/$', views.profile, name='profile'),
+        url(r'^profile/(?P<username>[\w\.@+-]+)/(?P<uid>\d+)/$', views.profile_id, name='profile_id'),
+        url(r'^search/$', views.search, name='search'),
+        url(r'^user/password/reset/$',
+            'django.contrib.auth.views.password_reset',
+            {'template_name': 'registration/password_reset_form.html',
+                'post_reset_redirect' : '/user/password/reset/done/'}),
+            #
+        url(r'^user/password/reset/done/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$',
+            'django.contrib.auth.views.password_reset_done'),
+            #'template_name': 'password_reset_done.html'),
+        url(r'^user/password/reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$',
+                'django.contrib.auth.views.password_reset_confirm',
+            {'template_name': 'password_reset_confirm.html',
+                'post_reset_redirect' : 'user/password/done/'}),
+        url(r'^user/password/done/$',
+            'django.contrib.auth.views.password_reset_complete')
+        )
 
 urlpatterns += staticfiles_urlpatterns()
