@@ -25,13 +25,14 @@ urlpatterns = patterns('',
             {'template_name': 'registration/password_reset_form.html',
                 'post_reset_redirect' : '/user/password/reset/done/'}),
             #
-        url(r'^user/password/reset/done/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$',
+        url(r'^user/password/reset/done/',
             'django.contrib.auth.views.password_reset_done'),
             #'template_name': 'password_reset_done.html'),
         url(r'^user/password/reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$',
-                'django.contrib.auth.views.password_reset_confirm',
-            {'template_name': 'password_reset_confirm.html',
-                'post_reset_redirect' : 'user/password/done/'}),
+            'django.contrib.auth.views.password_reset_confirm',
+            {'template_name': 'registration/password_reset_confirm.html',
+                'post_reset_redirect' : 'user/password/done/'},
+            name='password_reset_confirm'),
         url(r'^user/password/done/$',
             'django.contrib.auth.views.password_reset_complete')
         )

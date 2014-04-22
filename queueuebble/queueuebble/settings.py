@@ -90,7 +90,7 @@ DATABASES = {
 #         'NAME': 'queueuebble',
 #         'USER': 'queue_admin',
 #         'PASSWORD': 'abc123'
- 
+
 #    }
 # }
 
@@ -119,3 +119,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
 
 STATIC_URL = '/static/'
+
+TEMPLATE_DIRS = (
+        'templates'
+        )
