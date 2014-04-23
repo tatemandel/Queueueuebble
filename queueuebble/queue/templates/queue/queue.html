@@ -1,15 +1,6 @@
 <head>
   <style>
-    header, section {
-      display: block;
-    }
-    body {
-      font-family: 'Droid Serif';
-    }
-    h1, h2 {
-      text-align: center;
-      font-weight: normal;
-    }
+
     form {
       margin-bottom: 4px;
     }
@@ -70,8 +61,12 @@
   </script>
   <script type="text/javascript" src="http://farhadi.ir/projects/html5sortable/jquery.sortable.js">
   </script>
-  
 </head>
+
+{% extends 'base.html' %}
+
+<body>
+{% block content %}
 <h1>
   {{ queue.name }}
 </h1>
@@ -234,4 +229,5 @@
     });
   </script>
 {% endif %}
-
+{% endblock %}
+</body>

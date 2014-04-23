@@ -36,6 +36,7 @@ def register(request):
 
       #send confirmation mail
       send_mail('Welcome to queueubble!', 'Thanks for registering.', 'jonathanp.chen@gmail.com', [user.email], fail_silently=False)
+      return HttpResponseRedirect('/')
     else:
       print user_form.errors, profile_form.errors
 
