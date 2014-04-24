@@ -248,3 +248,6 @@ def search(request):
     return render(request, 'queue/search_results.html', {'queues': queues, 'users': users, 'query': q})
   else:
     return HttpResponse('Submit a search term')
+
+def pebble_login(request):
+	return 

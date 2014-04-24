@@ -1,6 +1,6 @@
+
 <head>
   <style>
-
     form {
       margin-bottom: 4px;
     }
@@ -55,17 +55,10 @@
       font-size: 0.7em;
     }
   </style>
-  <link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
-  
-  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js">
-  </script>
-  <script type="text/javascript" src="http://farhadi.ir/projects/html5sortable/jquery.sortable.js">
-  </script>
 </head>
-
 {% extends 'base.html' %}
 
-<body>
+
 {% block content %}
 <h1>
   {{ queue.name }}
@@ -179,6 +172,10 @@
 <!-- <input draggable='false' type="hidden" name="reorderData" id="reorderData"/> -->
 <input type="submit" id="confirmReorder" value="Submit Reordering"/>
 {% if myqueue %}
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js">
+  </script>
+  <script type="text/javascript" src="http://farhadi.ir/projects/html5sortable/jquery.sortable.js">
+  </script>
   <script>
     $(function() {
       $.ajaxSetup({ 
@@ -230,4 +227,3 @@
   </script>
 {% endif %}
 {% endblock %}
-</body>
