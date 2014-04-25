@@ -253,7 +253,6 @@ def pebble_login(request):
   context = RequestContext(request)
   if request.method == 'POST':
     username = request.POST['username']
-
     password = request.POST['password']
     user = authenticate(username=username, password=password)
 
