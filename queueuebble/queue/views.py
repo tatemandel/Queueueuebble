@@ -1,3 +1,4 @@
+import json
 from queue.forms import UserForm, UserProfileForm
 from queue.models import UserProfile, Queue, Node
 from django.shortcuts import render, render_to_response
@@ -7,6 +8,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
+from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
   return render(request, 'queue/index.html', {})
@@ -251,3 +253,25 @@ def search(request):
 
 def pebble_login(request):
   return render_to_response('queue/pebble_login.html') 
+
+@csrf_exempt
+def pebble_get_queues(request):
+  context = RequestContext(request)
+  if request.method == 'POST':
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(username=username, password=password)
+
+    if user is not None:
+        puser = UserProfile.objects.get(user=user)
+        data = []
+        for n in Node.objects.filter(user=puser):
+          d = { 'creator' : n.queue.creator.user.username,
+                'name' : n.queue.name,
+                'id' : n.queue.id }
+          data.append(d)
+        return HttpResponse(json.dumps(data), content_type="application/json")
+    else:
+      return HttpResponse("Invalid login information!")
+  else:
+    return HttpResponse("No login information provided!")

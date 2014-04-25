@@ -19,7 +19,8 @@ urlpatterns = patterns('',
     url(r'^profile/(?P<username>[\w\.@+-]+)/$', views.profile, name='profile'),
     url(r'^profile/(?P<username>[\w\.@+-]+)/(?P<uid>\d+)/$', views.profile_id, name='profile_id'),
     url(r'^search/$', views.search, name='search'),
-    url(r'^pebble_login/$', views.pebble_login, name='pebble_login')
+    url(r'^pebble_login/$', views.pebble_login, name='pebble_login'),
+    url(r'^pebble_get_queues/$', views.pebble_get_queues, name='pebble_get_queues')
 )
 
 urlpatterns += staticfiles_urlpatterns()
