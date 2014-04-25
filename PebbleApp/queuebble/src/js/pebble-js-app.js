@@ -7,7 +7,7 @@ Pebble.addEventListener("ready",
 Pebble.addEventListener("showConfiguration",
   function(e) {
     console.log("Configuration window shown");
-	Pebble.openURL("http://54.84.161.157/pebble_login/");
+    Pebble.openURL("http://54.84.161.157/pebble_login/");
   }
 );
 
