@@ -1,39 +1,79 @@
-{% extends 'dashboard.html' %}
+<head>
+    <link href="../../static/css/dashboard.css" rel="stylesheet">
+</head>
 
-{% block dash %}
-{% if user.is_authenticated %}
-<h1>{{ user.username }}'s Dashboard</h1>
+{% extends 'base.html' %}
 
-<div>
-    <h2>Queues Owned</h2>
-    {% for q in owned %}
-    <a href="/profile/{{ q.creator.user.username }}/{{ q.id }}/">{{ q.name }}</a><br/>
-    {% endfor %}
+{% block content %}
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li class="active"><a href="#">Overview</a></li>
+            </ul>
+            <ul class="nav nav-sidebar">
+                <li> <a href="#"> Create Queue </a>
+                    <form id="add_queue_form" class="navbar-form" method="post" action="/dashboard/">
+                    {% csrf_token %}
+                    <input type="text" placeholder="queue name" name="queuename"/> 
+                    <button type="submit" name="createQueue" value="Submit" class='form-control'> Create </button>
+                    </form>
+                </li>
+            </ul>
+
+            <ul class="nav nav-sidebar"> 
+                <li> <a href="#"> Search </a>
+                <form action="/search/" class="navbar-form" method="get">
+                    <input type="text" name="q"/>
+                    <button type="submit" value="Search" class='form-control' data-toggle="modal" data-target="#searchModal"> Search </button>
+                </form>
+                </li>
+            </ul>
+         </div>
+
+        <div class="col-sm-8 col-md-10  main">
+            {% if user.is_authenticated %}
+                <h1 class="page-header">Dashboard <small> {{ user.username }} </small></h1>
+            {% endif %}
+
+            <div class="row">
+            <div class="col-md-5">
+                <h2>Queues Owned</h2>
+                <ul>
+                {% for q in owned %}
+                <li>
+                    <a href="/profile/{{ q.creator.user.username }}/{{ q.id }}/">{{ q.name }}</a><br/>
+                    <form id="open_close_queue" method="post" action="/dashboard/">
+                    {% csrf_token %}
+                    <input type="hidden" name="queueid" value="{{ q.id }}"/>
+                    {% if q.closed %}
+                        <input type="submit" name="closeOpen" value="Open Queue"/>
+                    {% else %}
+                        <input type="submit" name="closeOpen" value="Close Queue"/>
+                    {% endif %}
+                    </form>
+                    
+                    <form id="destroy_queue" method="post" action="/dashboard/">
+                    {% csrf_token %}
+                    <input type="hidden" name="queueid" value="{{ q.id }}"/>
+                    <input type="submit" name="destroy" value="Destroy Queue"/>
+                  </form>
+                </li>
+              {% endfor %}
+            </ul>
+        </div>
+
+        <div class="col-md-5">
+            <h2>Queues In</h2>
+            {% for q in qin %}
+                <a href="/profile/{{ q.creator.user.username }}/{{ q.id }}/">{{ q.name }}</a><br/>
+            {% endfor %}
+        </div>
+        </div>
+    </div>  <!-- main -->
+        
 </div>
-<form id="add_queue_form" method="post" action="/dashboard/">
-    {% csrf_token %}
-    <h3>Create Queue</h3>
-    Queue Name: <input type="text" name="queuename"/> 
-    <input type="submit" value="Submit"/>
-</form>
-<div>
-    <h2>Queues In</h2>
-    {% for q in qin %}
-    <a href="/profile/{{ q.creator.user.username }}/{{ q.id }}/">{{ q.name }}</a><br/>
-    {% endfor %}
-</div>
+{% endblock %}
 
-{% if exists and not queuename == None %}
-<script>
-    alert("Queue with that name already exists!")
-</script>
-{% endif %}
-
-<h2>Search</h2>
-<form action="/search/" method="get">
-    <input type="text" name="q"/>
-    <input type="submit" value="Search"/>
-</form>
 
 <h2>Favorites</h2>
 {% for fav in favorites %}
@@ -43,17 +83,4 @@
 <p>You have no favorites</p>
 {% endif %}
 
-<!--
-<h2>Recently Visited</h2>
-{% for vis in visited %}
-<a href="/profile/{{ vis.creator.user.username }}/{{ vis.id }}/">{{ vis.name }}</a>
-{% endfor %}
-{% if not visited %}
-<p>You haven't visited any queues yet.</p>
-{% endif %}
 
-{% endif %}
-<<<<<<< HEAD
-{% endblock %}
-=======
--->

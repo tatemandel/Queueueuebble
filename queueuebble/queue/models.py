@@ -17,6 +17,7 @@ class Queue(models.Model):
   size = models.IntegerField(default=0)
   creator = models.ForeignKey(UserProfile, related_name="creator")
   owner = models.ManyToManyField(UserProfile)
+  closed = models.BooleanField(default=False)
   
   def __unicode__(self):
     return self.name

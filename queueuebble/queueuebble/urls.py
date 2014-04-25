@@ -27,12 +27,12 @@ urlpatterns = patterns('',
                 'post_reset_redirect': '/user/password/reset/done/',
                 'email_template_name': 'reg/password_email.html'},
             name='password_reset'),
-            #
+        #
         url(r'^user/password/reset/done/',
             'django.contrib.auth.views.password_reset_done',
             {'template_name': 'reg/password_reset_done.html'},
             name='password_reset_done'),
-            #'template_name': 'password_reset_done.html'),
+        #'template_name': 'password_reset_done.html'),
         url(r'^user/password/reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>.+)/$',
             'django.contrib.auth.views.password_reset_confirm',
             #views.password_reset_confirm,
@@ -42,7 +42,9 @@ urlpatterns = patterns('',
         url(r'^user/password/done/',
             'django.contrib.auth.views.password_reset_complete',
             {'template_name': 'reg/password_reset_complete.html'},
-            name='password_done')
+            name='password_done'),
+        url(r'^pebble_login/$', views.pebble_login, name='pebble_login'),
+        url(r'^pebble_get_queues/$', views.pebble_get_queues, name='pebble_get_queues')
         )
 
 urlpatterns += staticfiles_urlpatterns()

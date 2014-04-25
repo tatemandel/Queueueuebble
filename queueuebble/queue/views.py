@@ -1,3 +1,4 @@
+import json
 from queue.forms import UserForm, UserProfileForm
 from queue.models import UserProfile, Queue, Node
 from django.shortcuts import render, render_to_response
@@ -13,7 +14,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.cache import never_cache
 from django.core.urlresolvers import resolve
-from django.core.urlresolvers import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
   return render(request, 'queue/index.html', {})
@@ -43,6 +44,7 @@ def register(request):
 
       #send confirmation mail
       send_mail('Welcome to queueubble!', 'Thanks for registering.', 'jonathanp.chen@gmail.com', [user.email], fail_silently=False)
+      return HttpResponseRedirect('/')
     else:
       print user_form.errors, profile_form.errors
 
@@ -94,15 +96,25 @@ def dashboard(request):
   queuename = None
 
   if request.method == 'POST':
-    queuename = request.POST['queuename']
-    queues = len(Queue.objects.filter(name=queuename, owner=puser))
-    if queues == 0:
-      queue = Queue(name=queuename, creator=puser)
-      queue.save()
-      queue.owner.add(puser)
-      queue.save()
-    else:
-      exists = True
+    if 'createQueue' in request.POST:
+      queuename = request.POST['queuename']
+      queues = len(Queue.objects.filter(name=queuename, owner=puser))
+      if queues == 0:
+        queue = Queue(name=queuename, creator=puser)
+        queue.save()
+        queue.owner.add(puser)
+        queue.save()
+      else:
+        exists = True
+    if 'closeOpen' in request.POST:
+      queueid = request.POST['queueid']
+      queue_to_close = Queue.objects.get(id=queueid)
+      queue_to_close.closed = not queue_to_close.closed
+      queue_to_close.save()
+    if 'destroy' in request.POST:
+      queueid = request.POST['queueid']
+      queue_to_destroy = Queue.objects.get(id=queueid)
+      queue_to_destroy.delete()
 
   owned = Queue.objects.filter(owner=puser)
   favorites = puser.favorites.all()
@@ -119,6 +131,18 @@ def profile(request, username):
 
   return render(request, 'queue/profile.html', locals())
 
+def confirm_reorder(request, queue):
+  arr = request.POST.getlist('arr[]')
+  nodes = Node.objects.filter(queue=queue)
+  i = 0
+  for user_name in arr:
+    user_object = User.objects.get(username=user_name)
+    up_object = UserProfile.objects.get(user=user_object)
+    no = nodes.get(user=up_object)
+    no.position = i
+    no.save()
+    i = i + 1
+
 @login_required
 def profile_id(request, username, uid):
   u = User.objects.get(username=username)
@@ -128,7 +152,7 @@ def profile_id(request, username, uid):
   nodes.sort(key=lambda x: x.position)
   qsize = queue.size
   p = UserProfile.objects.get(user=request.user)
-  myqueue = p == puser
+  myqueue = p in queue.owner.all()
   contains = queue.contains(p)
   users_nodes = Node.objects.filter(queue=queue, user=p)
   user_node = None
@@ -136,7 +160,13 @@ def profile_id(request, username, uid):
   if not len(users_nodes) == 0:
     user_node = users_nodes[0]
 
-  if request.method == 'POST':
+  # ajax
+  if request.method == 'POST' and request.is_ajax:
+    if request.POST.get('name') == "reorderQueue":
+      confirm_reorder(request, queue)
+
+  # not ajax
+  elif request.method == 'POST':
     if 'addFavorite' in request.POST:
       p.favorites.add(queue)
       fav = True
@@ -185,17 +215,6 @@ def profile_id(request, username, uid):
               n.position = n.position - 1
               n.save()
           nodes.sort(key=lambda x: x.position)
-    if 'reorderQueue' in request.POST:
-      ns = request.POST.get('reorderData').split(',')
-      nodes = Node.objects.filter(queue=queue)
-      i = 0
-      for user_name in ns:
-        user_object = User.objects.get(username=user_name)
-        up_object = UserProfile.objects.get(user=user_object)
-        no = nodes.get(user=up_object)
-        no.position = i
-        no.save()
-        i = i + 1
     if 'changeStatus' in request.POST:
       userNameS = request.POST.get('statusChangeUser')
       if not userNameS == None:
@@ -208,16 +227,26 @@ def profile_id(request, username, uid):
           userSNode.save()
           nodes = list(Node.objects.filter(queue=queue))
           nodes.sort(key=lambda x: x.position)
+    if 'addOwner' in request.POST:
+      usernameO = request.POST.get('newowner')
+      if User.objects.filter(username=usernameO):
+        userO = User.objects.get(username=usernameO)
+        userOProf = UserProfile.objects.get(user=userO)
+        queue.owner.add(userOProf)
+        queue.save()
+    if 'openClose' in request.POST:
+      queue.closed = not queue.closed
+      queue.save()
+    if 'destroy' in request.POST:
+      queue.delete()
+      return HttpResponseRedirect('/dashboard/')
 
   users_nodes = Node.objects.filter(queue=queue, user=p)
+  owners = queue.owner.all()
   user_node = None
   if not len(users_nodes) == 0:
     user_node = users_nodes[0]
-
   return render(request, 'queue/queue.html', locals())
-
-def search_form(request):
-  return render(request, 'queue/search_form.html')
 
 def search(request):
   if 'q' in request.GET and request.GET['q']:
@@ -227,7 +256,6 @@ def search(request):
     return render(request, 'queue/search_results.html', {'queues': queues, 'users': users, 'query': q})
   else:
     return HttpResponse('Submit a search term')
-
 
 @csrf_protect
 def password_reset(request, is_admin_site=False,
@@ -393,3 +421,26 @@ def password_change_done(request,
         context.update(extra_context)
     return TemplateResponse(request, template_name, context,
                             current_app=current_app)
+def pebble_login(request):
+  return render_to_response('queue/pebble_login.html')
+
+@csrf_exempt
+def pebble_get_queues(request):
+  if request.method == 'POST':
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(username=username, password=password)
+
+    if user is not None:
+        puser = UserProfile.objects.get(user=user)
+        data = []
+        for n in Node.objects.filter(user=puser):
+          d = { 'creator' : n.queue.creator.user.username,
+                'name' : n.queue.name,
+                'id' : n.queue.id }
+          data.append(d)
+        return HttpResponse(json.dumps(data), content_type="application/json")
+    else:
+      return HttpResponse("Invalid login information!")
+  else:
+    return HttpResponse("No login information provided!")

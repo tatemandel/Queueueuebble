@@ -25,6 +25,7 @@ body {
 /* Hide for mobile, show later */
 .sidebar {
   display: none;
+  height: 100%;
 }
 @media (min-width: 768px) {
   .sidebar {
@@ -54,7 +55,7 @@ body {
 }
 .nav-sidebar > .active > a {
   color: #fff;
-  background-color: #428bca;
+  background-color: #90c680;
 }
 
 

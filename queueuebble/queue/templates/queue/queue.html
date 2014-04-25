@@ -1,14 +1,8 @@
+
 <head>
   <style>
-    header, section {
-      display: block;
-    }
-    body {
-      font-family: 'Droid Serif';
-    }
-    h1, h2 {
-      text-align: center;
-      font-weight: normal;
+    form {
+      margin-bottom: 4px;
     }
     #features {
       margin: auto;
@@ -37,7 +31,7 @@
       color: #1C94C4;
       margin: 5px;
       padding: 5px;
-      height: 22px;
+      height: 75px;
     }
     .handles span {
       cursor: move;
@@ -54,110 +48,164 @@
       border: 1px dashed #CCC;
       background: none;
     }
+
+    label.status {
+      padding-bottom: 5px;
+      color: #aaaaaa;
+      font-size: 0.7em;
+    }
   </style>
-  <link href='http://fonts.googleapis.com/css?family=Droid+Serif' rel='stylesheet' type='text/css'>
-  
-  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js">
-  </script>
-  <script type="text/javascript" src="http://farhadi.ir/projects/html5sortable/jquery.sortable.js">
-  </script>
-  
 </head>
+
+
+{% block content %}
 <h1>
   {{ queue.name }}
 </h1>
 
-<h3>
-  {{ username }}'s Queue
-</h3>
-
-{% if not myqueue %}
-{% if fav %}
-<form method="post" id="remove_favorite" action="/profile/{{ username }}/{{ uid }}/">
-  {% csrf_token %}
-  <input type="submit" name="removeFavorite" value="Remove from Favorites"/>
-</form>
+<h3>{{ username }}'s Queue</h3>
+{% if queue.closed %}
+  <p>This queue is closed</p>
 {% else %}
-<form method="post" id="add_favorite" action="/profile/{{ username }}/{{ uid }}/">
-  {% csrf_token %}
-  <input type="submit" name="addFavorite" value="Add to Favorites"/>
-</form>
-{% endif %}
-{% endif %}
-
-{% if not contains and not myqueue %}
-<form id="add_to_queue_form" method="post" 
-action="/profile/{{ username }}/{{ uid }}/">
-  {% csrf_token %}
-  <input type="submit" name="addMyself" value="Add myself to this queue"/>
-</form>
-{% endif %}
-
-{% if contains %}
-{% if user_node.position == 1 %}
-<h4>
-  There is {{ user_node.position }} person in front of you.
-</h4>
-{% else %}
-<h4>
-  There are {{ user_node.position }} people in front of you.
-</h4>
-{% endif %}
+  <p>This queue is open</p>
 {% endif %}
 
 {% if myqueue %}
-<form id="reorder" method="post" action="/profile/{{ username }}/{{ uid }}/">
-{% endif %}
-  <ul id="sortable1" class="sortable list">
-    {% for n in nodes %}
-    {% if n == user_node %}
-    <li draggable="true" user="{{ n.user }}" class="highlight">
-      <strong>{{ n.user }}, Status: {{ n.getStatus }}</strong>
-      <form id="remove_myself_form" method="post" 
-      action="/profile/{{ username }}/{{ uid }}/">
-        {% csrf_token %}
-        <input type="submit" name="removeMyself" value="Remove myself from this queue"/>
-      </form>
-    </li>
+  <form method="post" id="open_close" action="/profile/{{ username }}/{{ uid }}/">
+    {% csrf_token %}
+    {% if queue.closed %}
+      <input type="submit" name="openClose" value="Open Queue">
     {% else %}
-    <li draggable="true" user="{{ n.user }}" >
-      {{ n.user }}, Status: {{ n.getStatus }}
-      {% if myqueue %}
-      </br>
-      <form id="change_status_form" method="post" 
-      action="/profile/{{ username }}/{{ uid }}/">
-        {% csrf_token %}
-	{% if n.getStatus == "Not started" %}
-          <input type="submit" name="changeStatus" value="Change to in progess"/>
-	{% elif n.getStatus == "In progress" %}
-	  <input type="submit" name="changeStatus" value="Change to completed"/>
-	{% else %}
-	  <input type="hidden" name="changeStatus">
-	{% endif %}
-	<input type="hidden" name="statusChangeUser" value="{{ n.user }}"/>
-      </form>
-      <form id="remove_from_myqueue_form" method="post" 
-      action="/profile/{{ username }}/{{ uid }}/">
-        {% csrf_token %}
-        <input type="hidden" name="nodeToRemove2" value="{{ n.user }}"/>
-        <input type="submit" name="removeFromMyQueue" value="Remove this person from my Queue"/>
-      </form>
-      {% endif %}
-      <br/>
-    </li>
+      <input type="submit" name="openClose" value="Close Queue">
     {% endif %}
-    {% endfor %}
-    {% if not qsize == 0 and myqueue %}
-    <input draggable='false' type="hidden" name="reorderData" id="reorderData"/>
-    <input draggable='false' type="submit" name="reorderQueue" value="Submit Reordering"/>
+  </form>
+  <form method="post" id="destroy_queue" action="/profile/{{ username }}/{{ uid }}/">
+    {% csrf_token %}
+      <input type="submit" name="destroy" value="Destroy Queue">
+  </form>
+{% endif %}
+
+<h3>Owners</h3>
+<ul>
+  {% for owner in owners %}
+    <li>{{ owner.user.username }}</li>
+  {% endfor %}
+</ul>
+{% if myqueue %}
+  <h3>Add Owner</h3>
+  <form method="post" id="add_owner" action="/profile/{{ username }}/{{ uid }}/">
+    {% csrf_token %}
+    Username: <input type="text" name="newowner"/>
+    <input type="submit" name="addOwner" value="Submit">
+  </form>
+{% endif %}
+
+{% if not myqueue %}
+  {% if fav %}
+    <form method="post" id="remove_favorite" action="/profile/{{ username }}/{{ uid }}/">
+      {% csrf_token %}
+      <input type="submit" name="removeFavorite" value="Remove from Favorites"/>
+    </form>
+  {% else %}
+    <form method="post" id="add_favorite" action="/profile/{{ username }}/{{ uid }}/">
+      {% csrf_token %}
+      <input type="submit" name="addFavorite" value="Add to Favorites"/>
+    </form>
+  {% endif %}
+{% endif %}
+
+{% if not contains and not myqueue and not queue.closed %}
+  <form id="add_to_queue_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
+    {% csrf_token %}
+    <input type="submit" name="addMyself" value="Add myself to this queue"/>
+  </form>
+{% endif %}
+
+{% if contains %}
+  {% if user_node.position == 1 %}
+    <h4>There is {{ user_node.position }} person in front of you.</h4>
+  {% else %}
+    <h4>There are {{ user_node.position }} people in front of you.</h4>
+  {% endif %}
+{% endif %}
+
+<ul id="sortable1" class="sortable list">
+  {% for n in nodes %}
+    {% if n == user_node %}
+      <li draggable="true" user="{{ n.user }}" class="highlight">
+        <strong>{{ n.user }}</strong>
+        <br> <label class='status'> status: {{ n.getStatus }} </label>
+        <form id="remove_myself_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
+          {% csrf_token %}
+          <input type="submit" name="removeMyself" value="Remove myself from this queue"/>
+        </form>
+      </li>
+    {% else %}
+      <li draggable="true" user="{{ n.user }}" >
+        {{ n.user }}
+        <br> <label class = 'status'> status: {{n.getStatus}}</label>
+        {% if myqueue %}
+          <form id="change_status_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
+            {% csrf_token %}
+            {% if n.getStatus == "Not started" %}
+              <input type="submit" name="changeStatus" value="Change to in progess"/>
+            {% elif n.getStatus == "In progress" %}
+              <input type="submit" name="changeStatus" value="Change to completed"/>
+            {% else %}
+              <input type="hidden" name="changeStatus">
+            {% endif %}
+            <input type="hidden" name="statusChangeUser" value="{{ n.user }}"/>
+          </form>
+          <form id="remove_from_myqueue_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
+            {% csrf_token %}
+            <input type="hidden" name="nodeToRemove2" value="{{ n.user }}"/>
+            <input type="submit" name="removeFromMyQueue" value="Remove this person from my Queue"/>
+          </form>
+        {% endif %}
+      </li>
     {% endif %}
-  </ul>
- {% if myqueue %}
-   <script>
+  {% endfor %}
+  {% if not qsize == 0 and myqueue %}
+  {% endif %}
+</ul>
+<!-- <input draggable='false' type="hidden" name="reorderData" id="reorderData"/> -->
+<input type="submit" id="confirmReorder" value="Submit Reordering"/>
+{% if myqueue %}
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js">
+  </script>
+  <script type="text/javascript" src="http://farhadi.ir/projects/html5sortable/jquery.sortable.js">
+  </script>
+  <script>
     $(function() {
+      $.ajaxSetup({ 
+        beforeSend: function(xhr, settings) {
+          function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+              var cookies = document.cookie.split(';');
+              for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+                }
+              }
+            }
+            return cookieValue;
+          }
+          if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+            // Only send the token to relative URLs i.e. locally.
+            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+          }
+        } 
+      });
+
       $('#sortable1').sortable();
-      
-      $('.sortable').sortable().bind('sortupdate', function() {
+     
+      $('#confirmReorder').click(function() {
+
+//    $('.sortable').sortable().bind('sortupdate', function() {
         datas = new Array();
         var i = 0;
         
@@ -165,11 +213,16 @@ action="/profile/{{ username }}/{{ uid }}/">
           datas[i] = $(this).attr('user');
           i++;
         });
-
-        $('#reorderData')[0].value = datas;
         
+        $.ajax({
+          type: "POST",
+          url: "/profile/{{ username }}/{{ uid }}/",
+          data : { name: "reorderQueue", arr : datas }
+        });
+
       });
+
     });
   </script>
-</form>
 {% endif %}
+{% endblock %}

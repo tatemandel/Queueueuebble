@@ -1,0 +1,18 @@
+{
+  "uuid": "b943f8f4-27e2-48cc-923b-e37d2da75827",
+  "shortName": "queuebble",
+  "longName": "queuebble",
+  "companyName": "MakeAwesomeHappen",
+  "versionCode": 1,
+  "versionLabel": "1.0.0",
+  "watchapp": {
+    "watchface": false
+  },
+  "appKeys": {
+    "dummy": 0
+  },
+  "resources": {
+    "media": []
+  },
+"capabilities": [ "configurable" ]
+}
