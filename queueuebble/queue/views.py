@@ -12,6 +12,8 @@ from django.contrib.auth.forms import AuthenticationForm, PasswordResetForm, Set
 from django.contrib.auth.tokens import default_token_generator
 from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.cache import never_cache
+from django.core.urlresolvers import resolve
+from django.core.urlresolvers import reverse
 
 def index(request):
   return render(request, 'queue/index.html', {})
