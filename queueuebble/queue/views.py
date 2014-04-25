@@ -250,27 +250,4 @@ def search(request):
     return HttpResponse('Submit a search term')
 
 def pebble_login(request):
-  context = RequestContext(request)
-  if request.method == 'POST':
-    username = request.POST['username']
-    password = request.POST['password']
-    user = authenticate(username=username, password=password)
-
-    if user is not None:
-      if user.is_active:
-        login(request, user)
-        if request.POST.get('next') != '/' and request.POST.get('next') != None:
-          print request.POST.get('next')
-          return HttpResponseRedirect(request.POST.get('next'))
-        else:
-          return HttpResponse('You are now logged in.')
-      else:
-        return HttpResponse("Your Queuebble account is disabled.")
-    else:
-      print "Invalid login details: {0}, {1}".format(username, password)
-      return HttpResponse("Invalid login details supplied.")
-
-  else:
-    return render_to_response('queue/pebble_login.html', {}, context)
-
-  return render(request, 'queue/pebble_login.html', locals()) 
+  return render_to_response('queue/pebble_login.html') 
