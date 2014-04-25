@@ -271,8 +271,6 @@ def pebble_login(request):
       return HttpResponse("Invalid login details supplied.")
 
   else:
-    print request.GET.get('next', '/')
-    context['next'] = request.GET.get('next', '/')
     return render_to_response('queue/pebble_login.html', {}, context)
 
   return render(request, 'queue/pebble_login.html', locals()) 
