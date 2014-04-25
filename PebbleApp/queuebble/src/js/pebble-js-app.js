@@ -27,7 +27,7 @@ Pebble.addEventListener("webviewclosed", function(e) {
   http.setRequestHeader("Content-length", params.length);
   http.setRequestHeader("Connection", "close");
 
-  http.onreadystatechange = function() {
+  http.onload = function() {
     if (http.status == 200) {
       console.log(http.responseText);
     }
