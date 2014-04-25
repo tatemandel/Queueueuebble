@@ -24,7 +24,8 @@ urlpatterns = patterns('',
             'django.contrib.auth.views.password_reset',
             #views.password_reset,
             {'template_name': 'reg/password_reset_form.html',
-                'post_reset_redirect' : '/user/password/reset/done/'},
+                'post_reset_redirect': '/user/password/reset/done/',
+                'email_template_name': 'reg/password_email.html'},
             name='password_reset'),
             #
         url(r'^user/password/reset/done/',
@@ -36,10 +37,12 @@ urlpatterns = patterns('',
             'django.contrib.auth.views.password_reset_confirm',
             #views.password_reset_confirm,
             {'template_name': 'reg/password_reset_confirm.html',
-                'post_reset_redirect' : 'user/password/done/'},
+                'post_reset_redirect': 'user/password/done/'},
             name='password_reset_confirm'),
-        url(r'^user/password/done/$',
-            'django.contrib.auth.views.password_reset_complete')
+        url(r'^user/password/done/',
+            'django.contrib.auth.views.password_reset_complete',
+            {'template_name': 'reg/password_reset_complete.html'},
+            name='password_done')
         )
 
 urlpatterns += staticfiles_urlpatterns()
