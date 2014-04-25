@@ -256,11 +256,15 @@ def pebble_login(request):
 
 @csrf_exempt
 def pebble_get_queues(request):
-  context = RequestContext(request)
+  print "called function"
   if request.method == 'POST':
+    print "is post"
     username = request.POST['username']
+    print username
     password = request.POST['password']
+    print password
     user = authenticate(username=username, password=password)
+    print user
 
     if user is not None:
         puser = UserProfile.objects.get(user=user)
