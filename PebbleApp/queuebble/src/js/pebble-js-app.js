@@ -11,24 +11,26 @@ Pebble.addEventListener("showConfiguration",
   }
 );
 
-
 Pebble.addEventListener("webviewclosed", function(e) {
   console.log("Configuration window closed");
 
-  var options = JSON.stringify(JSON.parse(decodeURIComponent(e.response)));
-  console.log("Options = " + options);
-  var req = new XMLHttpRequest();
-  req.open("POST", "http://54.84.161.157/pebble_get_queues/", {
-    "username" : options['username'],
-    "password" : options['password']
-  });
-  req.onload = function(e) {
-    if (req.status == 200) {
-      var result =  JSON.parse(req.responseText);
-      console.log(result);
-    } else {
-      console.log("FUUUUUCKKKKK");
+  var options = JSON.parse(decodeURIComponent(e.response));
+  console.log("Options = " + JSON.stringify(options));
+  console.log(options['username'])
+  console.log(options['password'])
+
+  var http = new XMLHttpRequest();
+  var params = "username=" + options['username'] + "&password=" + options['password'];
+  http.open("POST", "HTTP://54.84.161.157/pebble_get_queues/", true);
+
+  http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  http.setRequestHeader("Content-length", params.length);
+  http.setRequestHeader("Connection", "close");
+
+  http.onreadystatechange = function() {
+    if (http.status == 200) {
+      console.log(http.responseText);
     }
-  };
-  req.send(null);
+  }
+  http.send(params);
 });
