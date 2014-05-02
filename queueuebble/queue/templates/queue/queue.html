@@ -168,8 +168,11 @@
   {% if not qsize == 0 and myqueue %}
   {% endif %}
 </ul>
-<!-- <input draggable='false' type="hidden" name="reorderData" id="reorderData"/> -->
-<input type="submit" id="confirmReorder" value="Submit Reordering"/>
+{% if myqueue %}
+  <!-- <input draggable='false' type="hidden" name="reorderData" id="reorderData"/> -->
+  <input type="submit" id="confirmReorder" value="Submit Reordering"/>
+  <div id="reorderResponse"></div>
+{% endif %}
 {% if myqueue %}
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js">
   </script>
@@ -217,11 +220,16 @@
         $.ajax({
           type: "POST",
           url: "/profile/{{ username }}/{{ uid }}/",
-          data : { name: "reorderQueue", arr : datas }
+          data : { 
+            name: "reorderQueue", 
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            arr : datas,
+            success: function(json) {
+              $('#reorderResponse').append("Reorder successful!");
+            },
+          },
         });
-
       });
-
     });
   </script>
 {% endif %}
