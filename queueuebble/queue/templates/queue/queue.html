@@ -168,8 +168,10 @@
   {% if not qsize == 0 and myqueue %}
   {% endif %}
 </ul>
-<!-- <input draggable='false' type="hidden" name="reorderData" id="reorderData"/> -->
-<input type="submit" id="confirmReorder" value="Submit Reordering"/>
+{% if myqueue %}
+  <!-- <input draggable='false' type="hidden" name="reorderData" id="reorderData"/> -->
+  <input type="submit" id="confirmReorder" value="Submit Reordering"/>
+{% endif %}
 {% if myqueue %}
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js">
   </script>
