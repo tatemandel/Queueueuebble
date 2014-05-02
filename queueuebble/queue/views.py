@@ -160,13 +160,13 @@ def profile_id(request, username, uid):
   if not len(users_nodes) == 0:
     user_node = users_nodes[0]
 
-  # ajax
-  if request.method == 'POST' and request.is_ajax:
+  if request.method == 'POST':
+
+    # ajax
     if request.POST.get('name') == "reorderQueue":
       confirm_reorder(request, queue)
 
-  # not ajax
-  elif request.method == 'POST':
+    # not ajax
     if 'addFavorite' in request.POST:
       p.favorites.add(queue)
       fav = True
