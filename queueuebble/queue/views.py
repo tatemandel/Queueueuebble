@@ -165,6 +165,9 @@ def profile_id(request, username, uid):
     # ajax
     if request.POST.get('name') == "reorderQueue":
       confirm_reorder(request, queue)
+      response = {'response' : "Order updated successfully!"}
+      print response
+      return HttpResponse(json.dumps(response), content_type="application/json")
 
     # not ajax
     if 'addFavorite' in request.POST:
