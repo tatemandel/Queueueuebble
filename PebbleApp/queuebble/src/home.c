@@ -6,9 +6,26 @@
 #define NUM_MENU_ITEMS 2
 #define NUM_MENU_SECTIONS 1
 
+#define USERNAME_KEY 1
+
 static Window *window;
 
 static MenuLayer *menu_layer;
+static TextLayer *text_layer;
+
+static char username[50];
+
+enum {
+  USER_KEY,
+};
+
+static void in_received_handler(DictionaryIterator *iter, void *context) {
+  Tuple *t = dict_find(iter, USER_KEY);
+
+  if (t) {
+    strcpy(username, t->value->cstring);
+  }
+}
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
 				   MenuIndex *cell_index, void *data) {
@@ -80,9 +97,16 @@ static void window_load(Window *window) {
     .select_click = menu_select_callback, 
   });
 
-  menu_layer_set_click_config_onto_window(menu_layer, window);
+  text_layer = text_layer_create((GRect) { .origin = { 0, 72 }, .size = { bounds.size.w, 20 } });
+  text_layer_set_text(text_layer, "Login to Queuebble");
+  text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
 
-  layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  if (username[0] == '\0') {
+    layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  } else {
+    menu_layer_set_click_config_onto_window(menu_layer, window);
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  }
 }
 
 static void window_unload(Window *window) {
@@ -95,6 +119,13 @@ void home_init(void) {
     .load = window_load,
     .unload = window_unload,
   });
+
+  username[0] = '\0';
+  if (persist_exists(USERNAME_KEY)) persist_read_string(USERNAME_KEY, username, 50);
+
+  app_message_register_inbox_received(in_received_handler);
+  app_message_open(512, 512);
+
   const bool animated = true;
   window_stack_push(window, animated);
 }
