@@ -4,6 +4,7 @@
 
 // should eventually be parametrized by the num of members in the queue
 #define NUM_MENU_ITEMS 1
+#define NUM_MENU_SECTIONS 1
 
 static Window *window;
 static MenuLayer *menu_layer;
@@ -31,6 +32,28 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer,
   }
 }
 
+// Here we draw what each header is                                    
+static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
+  // Determine which section we're working with 
+  switch (section_index) {
+  case 0:
+    // Draw title text in the section header, should eventually say
+    // "Member of 'Queue Name'"
+    menu_cell_basic_header_draw(ctx, cell_layer, "Members of This Queue");
+    break;
+  }
+}
+
+static uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data) {
+  return NUM_MENU_SECTIONS;
+}
+
+// A callback is used to specify the height of the section header
+static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
+  // This is a define provided in pebble.h that you may use for the default height                                                             
+  return MENU_CELL_BASIC_HEADER_HEIGHT;
+}
+
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, 
 			  void *data) {
   switch (cell_index->row) {
@@ -47,7 +70,10 @@ static void window_load(Window *window) {
   menu_layer = menu_layer_create(bounds);
 
   menu_layer_set_callbacks(menu_layer, NULL, (MenuLayerCallbacks) {
+    .get_num_sections = menu_get_num_sections_callback,
     .get_num_rows = menu_get_num_rows_callback,
+    .get_header_height = menu_get_header_height_callback,
+    .draw_header = menu_draw_header_callback,
     .draw_row = menu_draw_row_callback,
     .select_click = menu_select_callback, 
   });
