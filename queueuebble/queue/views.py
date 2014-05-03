@@ -437,7 +437,8 @@ def pebble_validate(request):
     user = authenticate(username=username, password=password)
 
     if user is not None:
-        return HttpResponse("Success", status=200)
+      data = { "username" : username }  
+      return HttpResponse(json.dumps(data), status=200)
     else:
       return HttpResponse(status=403)
   else:

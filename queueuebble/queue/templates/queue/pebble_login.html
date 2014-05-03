@@ -35,6 +35,8 @@
         </fieldset>
       </div>
     </div>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js">
+    </script>
     <script>
       function saveOptions() {
         var options = new Array();
@@ -79,13 +81,15 @@
 
           $.ajax({
             type: "POST",
-            url: "/pebble_validate/"
+            url: "/pebble_validate/",
             data : { 
               name: "validate", 
               csrfmiddlewaretoken: '{{ csrf_token }}',
               arr : saveOptions(),
               success: function(json) {
-                document.location = "pebblejs://close#" + encodeURIComponent(JSON.stringify(json));
+                var resp = { "username": saveOptions()[0] };
+                console.log(JSON.stringify(resp));
+                document.location = "pebblejs://close#" + encodeURIComponent(JSON.stringify(resp));
               },
               error: function(xhr, status, error) {
                 $("#response").append("Invalid login information provided.");
