@@ -77,8 +77,6 @@
         });
         
         $("#b-submit").click(function() {
-          console.log("Submit");
-
           $.ajax({
             type: "POST",
             url: "/pebble_validate/",
@@ -86,14 +84,16 @@
               name: "validate", 
               csrfmiddlewaretoken: '{{ csrf_token }}',
               arr : saveOptions(),
-              success: function(json) {
-                var resp = { "username": saveOptions()[0] };
-                console.log(JSON.stringify(resp));
-                document.location = "pebblejs://close#" + encodeURIComponent(JSON.stringify(resp));
-              },
-              error: function(xhr, status, error) {
-                $("#response").append("Invalid login information provided.");
-              }
+            },
+            success: function(response) {
+              console.log(response);
+              var resp = { "username": saveOptions()[0] };
+              console.log(JSON.stringify(resp));
+              document.location = "pebblejs://close#" + encodeURIComponent(JSON.stringify(resp));
+            },
+            error: function(error) {
+              console.log(error);
+              $("#response").append("Invalid login information provided.");
             },
           });
         });
