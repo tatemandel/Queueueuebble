@@ -44,7 +44,7 @@ urlpatterns = patterns('',
             {'template_name': 'reg/password_reset_complete.html'},
             name='password_done'),
         url(r'^pebble_login/$', views.pebble_login, name='pebble_login'),
-        url(r'^pebble_get_queues/$', views.pebble_get_queues, name='pebble_get_queues')
+        url(r'^pebble_validate/$', views.pebble_validate, name='pebble_validate')
         )
 
 urlpatterns += staticfiles_urlpatterns()

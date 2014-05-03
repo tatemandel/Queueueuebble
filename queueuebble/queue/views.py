@@ -427,23 +427,18 @@ def password_change_done(request,
 def pebble_login(request):
   return render_to_response('queue/pebble_login.html')
 
-@csrf_exempt
-def pebble_get_queues(request):
+def pebble_validate(request):
   if request.method == 'POST':
-    username = request.POST['username']
-    password = request.POST['password']
+    arr = request.POST.getlist('arr[]')
+    username = arr[0]
+    password = arr[1]
+    print username
+    print password
     user = authenticate(username=username, password=password)
 
     if user is not None:
-        puser = UserProfile.objects.get(user=user)
-        data = []
-        for n in Node.objects.filter(user=puser):
-          d = { 'creator' : n.queue.creator.user.username,
-                'name' : n.queue.name,
-                'id' : n.queue.id }
-          data.append(d)
-        return HttpResponse(json.dumps(data), content_type="application/json")
+        return HttpResponse("Success", status=200)
     else:
-      return HttpResponse("Invalid login information!")
+      return HttpResponse(status=403)
   else:
-    return HttpResponse("No login information provided!")
+    return HttpResponse("No login information provided!", status=403)
