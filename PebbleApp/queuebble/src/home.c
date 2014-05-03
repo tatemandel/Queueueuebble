@@ -10,12 +10,14 @@
 
 static Window *window;
 
+static Layer *window_layer;
 static MenuLayer *menu_layer;
 static TextLayer *text_layer;
 
 static char username[50];
 
 enum {
+  BLANK,
   USER_KEY,
 };
 
@@ -24,6 +26,9 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 
   if (t) {
     strcpy(username, t->value->cstring);
+    layer_remove_from_parent(text_layer_get_layer(text_layer));
+    menu_layer_set_click_config_onto_window(menu_layer, window);
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
   }
 }
 
@@ -83,7 +88,7 @@ void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index,
 }
 
 static void window_load(Window *window) {
-  Layer *window_layer = window_get_root_layer(window);
+  window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_frame(window_layer);
 
   menu_layer = menu_layer_create(bounds);
@@ -110,6 +115,7 @@ static void window_load(Window *window) {
 }
 
 static void window_unload(Window *window) {
+  persist_write_string(USERNAME_KEY, username);
   menu_layer_destroy(menu_layer);
 }
 

@@ -16,7 +16,14 @@ Pebble.addEventListener("webviewclosed", function(e) {
   var options = JSON.parse(decodeURIComponent(e.response));
   console.log(options['username'])
 
-
+  var id = Pebble.sendAppMessage({ "1" : options['username'] },
+    function(e) {
+      console.log("Success!");
+    },
+    function(e) {
+      console.log("Failure :(");      
+    }
+  );
 
   // var http = new XMLHttpRequest();
   // var params = "username=" + options['username'] + "&password=" + options['password'];
