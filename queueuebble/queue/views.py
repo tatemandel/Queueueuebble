@@ -432,13 +432,9 @@ def pebble_validate(request):
     arr = request.POST.getlist('arr[]')
     username = arr[0]
     password = arr[1]
-    print username
-    print password
     user = authenticate(username=username, password=password)
 
     if user is not None:
-        return HttpResponse("Success", status=200)
-    else:
-      return HttpResponse(status=403)
-  else:
-    return HttpResponse("No login information provided!", status=403)
+      return HttpResponse(username, status=200)
+
+    return HttpResponse("Error", status=403)
