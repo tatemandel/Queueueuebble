@@ -65,6 +65,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
   }
   if (id_t && name_t && size_t && status_t && num_t) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "received one admin");
     received++;
     char name[50];
     strcpy(name, name_t->value->cstring);
@@ -81,6 +82,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     }
   }
  if (id_t && name_t && status_t && num_t && creator_t && pos_t) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "received one member");
     received++;
     char name[50];
     strcpy(name, name_t->value->cstring);
