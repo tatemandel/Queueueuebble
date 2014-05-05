@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include "home.h"
 #include "member_queues.h"
 #include "member_queue.h"
 #include "mini-printf.h"
@@ -72,11 +73,12 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, 
 			  void *data) {
-  switch (cell_index->row) {
-  case 0:
-    mqueue_show(); // right now only a stub but we should have this take in a queue struct
-    break;
-  }
+  int i = cell_index->row;
+  if (i > mindex) return;
+  mqueue q = mqueues[i];
+  //layer_remove_from_parent(menu_layer_get_layer(menu_layer));
+  mqueue_reset();
+  load_queue(q.id, "mqueue");
 }
 
 static void window_load(Window *window) {

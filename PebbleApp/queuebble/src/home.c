@@ -1,5 +1,7 @@
 #include <pebble.h>
 #include "home.h"
+#include "admin_queue.h"
+#include "member_queue.h"
 #include "admin_queues.h"
 #include "member_queues.h"
 
@@ -28,7 +30,7 @@ enum {
   NUM_KEY, // 6
   CREATOR_KEY, // 7
   POSITION_KEY, // 8
-  FILLER_KEY, // 9
+  TYPE_KEY, // 9
   NO_DATA_KEY, // 10
 };
 
@@ -53,9 +55,10 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
   Tuple *num_t = dict_find(iter, NUM_KEY);
   Tuple *creator_t = dict_find(iter, CREATOR_KEY);
   Tuple *pos_t = dict_find(iter, POSITION_KEY);
+  Tuple *type_t = dict_find(iter, TYPE_KEY);
   Tuple *no_data_t = dict_find(iter, NO_DATA_KEY);
 
-  if (user_t) {
+  if (user_t && id_t == NULL && name_t == NULL && size_t == NULL && status_t == NULL) { // etc
     strcpy(username, user_t->value->cstring);
     layer_remove_from_parent(text_layer_get_layer(text_layer));
     menu_layer_set_click_config_onto_window(menu_layer, window);
@@ -72,8 +75,8 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     aqueues_add(size, id, name, status);
     if (received == num) {
       received = 0;
-      layer_remove_from_parent(text_layer_get_layer(text_layer));
-      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+      //      layer_remove_from_parent(text_layer_get_layer(text_layer));
+      //      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));  
       aqueues_show();
     }
   }
@@ -90,9 +93,38 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     mqueues_add(name, creator, pos, id, status);
     if (received == num) {
       received = 0;
-      layer_remove_from_parent(text_layer_get_layer(text_layer));
-      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+      //      layer_remove_from_parent(text_layer_get_layer(text_layer));
+      //      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));  
       mqueues_show();
+    }
+ }
+ if (user_t && id_t && status_t && num_t && pos_t && type_t) {
+    //    APP_LOG(APP_LOG_LEVEL_DEBUG, "Got queue message");
+    received++;
+    char user[50];
+    strcpy(user, user_t->value->cstring);
+    int id = id_t->value->int32;
+    int status = status_t->value->int32;
+    int num = num_t->value->int32;
+    int pos = pos_t->value->int32;
+    int type = type_t->value->int32;
+    
+    if (type == 1) {
+      aqueue_add(user, id, pos);
+    } else if (type == 2) {
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "mqueue add");
+      mqueue_add(user, id, pos);
+    }
+    if (received == num) {
+      received = 0;
+      //      layer_remove_from_parent(text_layer_get_layer(text_layer));
+      //      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));  
+      if (type == 1) {
+        aqueue_show();
+      } else if (type == 2) {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "mqueue gonna show");
+        mqueue_show();
+      }
     }
  }
  if (no_data_t) {
@@ -150,11 +182,22 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
   return MENU_CELL_BASIC_HEADER_HEIGHT;
 }
 
-static void send_messages(char *type) {
-  layer_remove_from_parent(menu_layer_get_layer(menu_layer));
-  text_layer_set_text(text_layer, "Loading...");
-  // figure out how to disable button controls.
-  layer_add_child(window_layer, text_layer_get_layer(text_layer));  
+void load_queue(int id, char *type) {
+  //  text_layer_set_text(text_layer, "Loading...");
+  //  layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  dict_write_cstring(iter, 1, type);
+  Tuplet value = TupletInteger(2, id);
+  dict_write_tuplet(iter, &value);
+  dict_write_end(iter);
+  app_message_outbox_send();
+}
+
+void send_messages(char *type) {
+  //  layer_remove_from_parent(menu_layer_get_layer(menu_layer));
+  //  text_layer_set_text(text_layer, "Loading...");
+  //  layer_add_child(window_layer, text_layer_get_layer(text_layer));  
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);
   dict_write_cstring(iter, 1, type);

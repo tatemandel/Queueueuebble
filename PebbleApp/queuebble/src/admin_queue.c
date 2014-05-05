@@ -1,6 +1,7 @@
 #include <pebble.h>
 #include "admin_queue.h"
 #include "admin.h"
+#include "mini-printf.h"
 
 #define NUM_MENU_ITEMS 1
 #define NUM_MENU_SECTIONS 1
@@ -10,10 +11,14 @@
 static Window *window;
 static MenuLayer *menu_layer;
 
-enum {
-  BLANK,
-  INIT_RESPONSE,
-};
+typedef struct amember {
+  char username[20];
+  int id;
+  int pos;
+} amember;
+
+amember mem[20];
+int asize = 0;
 
 // For functions below eventually cell_index-> row should index 
 // into an an array of members and this would be dependent on the
@@ -21,11 +26,12 @@ enum {
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
 				   MenuIndex *cell_index, void *data) {
-  switch (cell_index->row) {
-  case 0:
-    menu_cell_basic_draw(ctx, cell_layer, "Member 0", NULL, NULL);
-    break;
-  }
+  int i = cell_index->row;
+  if (i < 0) return;
+  amember a = mem[i];
+  char sub[20];
+  mini_snprintf(sub, 19, "Position: %d", a.pos);
+  menu_cell_basic_draw(ctx, cell_layer, a.username, sub, NULL);
 }
 
 // Here we draw what each header is                                    
@@ -54,7 +60,7 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer,
 					   uint16_t section_index, void *data) {
   switch (section_index) {
   case 0:
-    return NUM_MENU_ITEMS;
+    return asize;
   default:
     return 0;
   }
@@ -107,4 +113,17 @@ void aqueue_deinit(void) {
 void aqueue_show(void) {
   const bool animated = true;
   window_stack_push(window, animated);
+}
+
+void aqueue_add(char *username, int id, int pos) {
+  amember m;
+  strcpy(m.username, username);
+  m.id = id;
+  m.pos = pos;
+  mem[pos] = m;
+  if (pos + 1 > asize) asize = pos + 1;
+}
+
+void aqueue_reset() {
+  asize = 0;
 }

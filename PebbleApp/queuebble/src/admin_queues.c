@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include "home.h"
 #include "admin_queues.h"
 #include "admin_queue.h"
 #include "mini-printf.h"
@@ -69,11 +70,12 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer,
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, 
 			  void *data) {
-  switch (cell_index->row) {
-  case 0:
-    aqueue_show(); // right now only a stub but we should have this take in a queue struct
-    break;
-  }
+  int i = cell_index->row;
+  if (i > aindex) return;
+  aqueue q = aqueues[i];
+  //layer_remove_from_parent(menu_layer_get_layer(menu_layer));
+  aqueue_reset();
+  load_queue(q.id, "aqueue");
 }
 
 static void window_load(Window *window) {
@@ -83,12 +85,12 @@ static void window_load(Window *window) {
   menu_layer = menu_layer_create(bounds);
 
   menu_layer_set_callbacks(menu_layer, NULL, (MenuLayerCallbacks) {
-      .get_num_sections = menu_get_num_sections_callback,
-      .get_num_rows = menu_get_num_rows_callback,
-      .get_header_height = menu_get_header_height_callback,
-      .draw_header = menu_draw_header_callback,
-      .draw_row = menu_draw_row_callback,
-      .select_click = menu_select_callback, 
+    .get_num_sections = menu_get_num_sections_callback,
+    .get_num_rows = menu_get_num_rows_callback,
+    .get_header_height = menu_get_header_height_callback,
+    .draw_header = menu_draw_header_callback,
+    .draw_row = menu_draw_row_callback,
+    .select_click = menu_select_callback, 
   });
 
   menu_layer_set_click_config_onto_window(menu_layer, window);
