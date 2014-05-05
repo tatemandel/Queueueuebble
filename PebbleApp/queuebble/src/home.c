@@ -19,16 +19,33 @@ static char username[50];
 enum {
   BLANK,
   USER_KEY,
+  ADMIN_KEY,
 };
 
-static void in_received_handler(DictionaryIterator *iter, void *context) {
-  Tuple *t = dict_find(iter, USER_KEY);
+void out_sent_handler(DictionaryIterator *sent, void *context) {
 
-  if (t) {
-    strcpy(username, t->value->cstring);
+}
+
+void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "App Message Failed to Send!");
+}
+
+void in_dropped_handler(AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "App Message Dropped!");
+}
+
+static void in_received_handler(DictionaryIterator *iter, void *context) {
+  Tuple *user = dict_find(iter, USER_KEY);
+  Tuple *admin = dict_find(iter, ADMIN_KEY);
+
+  if (user) {
+    strcpy(username, user->value->cstring);
     layer_remove_from_parent(text_layer_get_layer(text_layer));
     menu_layer_set_click_config_onto_window(menu_layer, window);
     layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  }
+  if (admin) {
+    aqueues_show();     
   }
 }
 
@@ -69,19 +86,29 @@ static uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data
   return NUM_MENU_SECTIONS;
 }
 
-// A callback is used to specify the height of the section header
+// A callback is use id to specify the height of the section header
 static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
   // This is a define provided in pebble.h that you may use for the default height                                                             
   return MENU_CELL_BASIC_HEADER_HEIGHT;
+}
+
+static void send_messages(char *type) {
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  dict_write_cstring(iter, 1, type);
+  dict_write_cstring(iter, 2, username);
+  dict_write_end(iter);
+  app_message_outbox_send();
 }
 
 void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, 
 			  void *data) {
   switch (cell_index->row) {
   case 0:
-    aqueues_show(); // the admin_queues.c should initialize the queues a user owns when we call aqueues_init() in queuebble.c
+    send_messages("admin");
     break;
   case 1:
+    send_messages("member");
     mqueues_show();
     break;
   }
