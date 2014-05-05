@@ -95,15 +95,30 @@ static void window_load(Window *window) {
 
   menu_layer_set_click_config_onto_window(menu_layer, window);
 
-  text_layer = text_layer_create((GRect) { .origin = { 0, 72 }, .size = { bounds.size.w, 20 } });
-  text_layer_set_text(text_layer, "Loading...");
-  text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
+  text_layer = text_layer_create(bounds);
+  text_layer_set_text(text_layer, "You have no Queues add. Go to our webapp to add some.");
 
-  layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  if (aindex > 0) {
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  }
+  else {
+    layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  }
 }
 
 static void window_unload(Window *window) {
   menu_layer_destroy(menu_layer);
+}
+
+static void window_appear(Window *window) {
+  Layer *window_layer = window_get_root_layer(window);
+  layer_remove_child_layers(window_layer);
+  if (aindex > 0) {
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  }
+  else {
+    layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  }
 }
 
 void aqueues_init(void) {
@@ -111,6 +126,7 @@ void aqueues_init(void) {
   window_set_window_handlers(window, (WindowHandlers) {
     .load = window_load,
     .unload = window_unload,
+    .appear = window_appear,
   });
 }
 

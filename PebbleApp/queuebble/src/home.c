@@ -31,6 +31,7 @@ enum {
   CREATOR_KEY, // 7
   POSITION_KEY, // 8
   TYPE_KEY, // 9
+  NO_DATA_KEY, // 10
 };
 
 void out_sent_handler(DictionaryIterator *sent, void *context) {
@@ -55,6 +56,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
   Tuple *creator_t = dict_find(iter, CREATOR_KEY);
   Tuple *pos_t = dict_find(iter, POSITION_KEY);
   Tuple *type_t = dict_find(iter, TYPE_KEY);
+  Tuple *no_data_t = dict_find(iter, NO_DATA_KEY);
 
   if (user_t && id_t == NULL && name_t == NULL && size_t == NULL && status_t == NULL) { // etc
     strcpy(username, user_t->value->cstring);
@@ -97,8 +99,8 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
       //      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));  
       mqueues_show();
     }
-  }
-  if (user_t && id_t && status_t && num_t && pos_t && type_t) {
+ }
+ if (user_t && id_t && status_t && num_t && pos_t && type_t) {
     //    APP_LOG(APP_LOG_LEVEL_DEBUG, "Got queue message");
     received++;
     char user[50];
@@ -126,7 +128,17 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
         mqueue_show();
       }
     }
-  }
+ }
+ if (no_data_t) {
+   layer_remove_from_parent(text_layer_get_layer(text_layer));
+   layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+   if (no_data_t->value->int32 == 1) { 
+     aqueues_show();
+   }
+   else if (no_data_t->value->int32 == 2) {
+     mqueues_show();
+   }   
+ }
 }
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
