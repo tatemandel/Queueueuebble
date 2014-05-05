@@ -471,7 +471,7 @@ def pebble_get_member(request):
         d = { 'name' : n.queue.name,
               'creator' : n.queue.creator.user.username,
               'position' : n.position,
-              'status' : n.queue.status,
+              'status' : n.queue.closed,
               'id' : n.queue.id }
         data.append(d)
       return HttpResponse(json.dumps(data), content_type="application/json")
