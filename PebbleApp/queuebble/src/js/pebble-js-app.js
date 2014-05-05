@@ -61,12 +61,17 @@ function getOwned(username) {
     if (http.status == 200) {
       console.log(http.responseText);
       var ob = JSON.parse(http.responseText);
+      var data = [];
       ob.forEach(function(e) { 
-        console.log(e['size']); 
-        console.log(e['name']); 
-        console.log(e['id']); 
-        // send the messages
+        d = {};
+        d["2"] = e['id'];
+        d["3"] = e['name'];
+        d["4"] = e['size'];
+        d["5"] = e['status'];
+        d["6"] = ob.length;
+        data.push(d);
       });
+      sendMessages(data);
     } else {
       console.log(http.responseText);
     }
