@@ -112,10 +112,10 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     int type = type_t->value->int32;
     
     if (type == 1) {
-      aqueue_add(user, id, pos);
+      aqueue_add(user, id, pos, status);
     } else if (type == 2) {
       APP_LOG(APP_LOG_LEVEL_DEBUG, "mqueue add");
-      mqueue_add(user, id, pos);
+      mqueue_add(user, id, pos, status);
     }
     if (received == num) {
       received = 0;

@@ -14,12 +14,6 @@ static MenuLayer *menu_layer;
 // into an an array of members and this would be dependent on the
 // queue at that index
 
-typedef struct mmember {
-  char username[20];
-  int id;
-  int pos;
-} mmember;
-
 mmember mmem[20];
 int msize = 0;
 
@@ -115,11 +109,12 @@ void mqueue_show(void) {
   window_stack_push(window, animated);
 }
 
-void mqueue_add(char *username, int id, int pos) {
+void mqueue_add(char *username, int id, int pos, int status) {
   mmember m;
   strcpy(m.username, username);
   m.id = id;
   m.pos = pos;
+  m.status = status;
   mmem[pos] = m;
   if (pos + 1 > msize) msize = pos + 1;
 }

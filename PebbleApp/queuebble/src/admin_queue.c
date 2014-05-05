@@ -11,12 +11,6 @@
 static Window *window;
 static MenuLayer *menu_layer;
 
-typedef struct amember {
-  char username[20];
-  int id;
-  int pos;
-} amember;
-
 amember mem[20];
 int asize = 0;
 
@@ -67,11 +61,9 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer,
 }
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
-  switch (cell_index->row) {
-  case 0:
-    admin_show(); //should take in a member
-    break;
-  }
+  int i = cell_index->row;
+  if (i < 0) return;
+  admin_show(mem[i]); //should take in a member
 }
 
 static void window_load(Window *window) {
@@ -115,11 +107,12 @@ void aqueue_show(void) {
   window_stack_push(window, animated);
 }
 
-void aqueue_add(char *username, int id, int pos) {
+void aqueue_add(char *username, int id, int pos, int status) {
   amember m;
   strcpy(m.username, username);
   m.id = id;
   m.pos = pos;
+  m.status = status;
   mem[pos] = m;
   if (pos + 1 > asize) asize = pos + 1;
 }
