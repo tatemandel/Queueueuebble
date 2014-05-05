@@ -62,11 +62,9 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, 
 			  void *data) {
-  switch (cell_index->row) {
-  case 0:
-    member_show();
-    break;
-  }
+  int i = cell_index->row;
+  if (i < 0) return;
+  member_show(mmem[i]);
 }
 
 static void window_load(Window *window) {

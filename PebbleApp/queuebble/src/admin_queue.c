@@ -64,7 +64,7 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer,
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   int i = cell_index->row;
   if (i < 0) return;
-  admin_show(mem[i]); //should take in a member
+  admin_show(mem[i]);
 }
 
 static void window_load(Window *window) {

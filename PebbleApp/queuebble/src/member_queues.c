@@ -16,7 +16,6 @@ typedef struct mqueue {
   int status;
 } mqueue;
 
-
 static Window *window;
 static MenuLayer *menu_layer;
 static TextLayer *text_layer;
