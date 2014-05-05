@@ -1039,6 +1039,11 @@ a.socialIcon:hover, .socialHoverClass {
 	border-bottom: 4px solid;
 }
 
+.main {
+	top: 51px;
+	padding: 20px;
+	padding-top: 50px;
+}
 
 
 /* ========================================
