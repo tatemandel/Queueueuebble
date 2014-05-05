@@ -1,6 +1,7 @@
 #include <pebble.h>
 #include "member_queue.h"
 #include "member.h"
+#include "mini-printf.h"
 
 // should eventually be parametrized by the num of members in the queue
 #define NUM_MENU_ITEMS 1
@@ -13,20 +14,30 @@ static MenuLayer *menu_layer;
 // into an an array of members and this would be dependent on the
 // queue at that index
 
+typedef struct mmember {
+  char username[20];
+  int id;
+  int pos;
+} mmember;
+
+mmember mmem[20];
+int msize = 0;
+
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
 				   MenuIndex *cell_index, void *data) {
-  switch (cell_index->row) {
-  case 0:
-    menu_cell_basic_draw(ctx, cell_layer, "Member 0", NULL, NULL);
-    break;
-  }
+  int i = cell_index->row;
+  if (i < 0) return;
+  mmember a = mmem[i];
+  char sub[20];
+  mini_snprintf(sub, 19, "Position: %d", a.pos);
+  menu_cell_basic_draw(ctx, cell_layer, a.username, sub, NULL);
 }
 
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, 
 					   uint16_t section_index, void *data) {
   switch (section_index) {
   case 0:
-    return NUM_MENU_ITEMS;
+    return msize;
   default:
     return 0;
   }
@@ -102,4 +113,17 @@ void mqueue_deinit(void) {
 void mqueue_show(void) {
   const bool animated = true;
   window_stack_push(window, animated);
+}
+
+void mqueue_add(char *username, int id, int pos) {
+  mmember m;
+  strcpy(m.username, username);
+  m.id = id;
+  m.pos = pos;
+  mmem[pos] = m;
+  if (pos + 1 > msize) msize = pos + 1;
+}
+
+void mqueue_reset() {
+  msize = 0;
 }

@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include "home.h"
 #include "admin_queues.h"
 #include "admin_queue.h"
 #include "mini-printf.h"
@@ -18,6 +19,7 @@ typedef struct aqueue {
 
 static Window *window;
 static MenuLayer *menu_layer;
+static TextLayer *text_layer;
 
 aqueue aqueues[20];
 int aindex = 0;
@@ -68,11 +70,12 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer,
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, 
 			  void *data) {
-  switch (cell_index->row) {
-  case 0:
-    aqueue_show(); // right now only a stub but we should have this take in a queue struct
-    break;
-  }
+  int i = cell_index->row;
+  if (i > aindex) return;
+  aqueue q = aqueues[i];
+  //layer_remove_from_parent(menu_layer_get_layer(menu_layer));
+  aqueue_reset();
+  load_queue(q.id, "aqueue");
 }
 
 static void window_load(Window *window) {
@@ -91,6 +94,10 @@ static void window_load(Window *window) {
   });
 
   menu_layer_set_click_config_onto_window(menu_layer, window);
+
+  text_layer = text_layer_create((GRect) { .origin = { 0, 72 }, .size = { bounds.size.w, 20 } });
+  text_layer_set_text(text_layer, "Loading...");
+  text_layer_set_text_alignment(text_layer, GTextAlignmentCenter);
 
   layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
 }
