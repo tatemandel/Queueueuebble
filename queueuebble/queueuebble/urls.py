@@ -46,6 +46,7 @@ urlpatterns = patterns('',
         url(r'^pebble_login/$', views.pebble_login, name='pebble_login'),
         url(r'^pebble_validate/$', views.pebble_validate, name='pebble_validate'),
         url(r'^pebble_get_admin/$', views.pebble_get_admin, name='pebble_admin'),
+        url(r'^pebble_get_member/$', views.pebble_get_member, name='pebble_member'),
         )
 
 urlpatterns += staticfiles_urlpatterns()
