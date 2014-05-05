@@ -450,7 +450,8 @@ def pebble_get_admin(request):
       for q in Queue.objects.filter(owner=puser):
         d = { 'name' : q.name,
               'id' : q.id,
-              'size' : q.size }
+              'size' : q.size,
+              'status' : q.closed }
         data.append(d)
       return HttpResponse(json.dumps(data), content_type="application/json")
     else:
