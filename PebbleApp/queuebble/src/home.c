@@ -129,6 +129,14 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
       }
     }
  }
+ if (no_data_t && type_t) {
+   if (no_data_t->value->int32 == 3 && type_t->value->int32 == 1) {
+     aqueue_show();
+   }
+   else if (no_data_t->value->int32 == 3 && type_t->value->int32 == 2) {
+     mqueue_show();
+   }
+ }
  if (no_data_t) {
    layer_remove_from_parent(text_layer_get_layer(text_layer));
    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
@@ -137,7 +145,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
    }
    else if (no_data_t->value->int32 == 2) {
      mqueues_show();
-   }   
+   } 
  }
 }
 
