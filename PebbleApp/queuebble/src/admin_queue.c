@@ -2,7 +2,6 @@
 #include "admin_queue.h"
 #include "admin.h"
 
-// should eventually be parametrized by the num of members in the queue
 #define NUM_MENU_ITEMS 1
 #define NUM_MENU_SECTIONS 1
 

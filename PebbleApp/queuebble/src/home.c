@@ -16,14 +16,20 @@ static TextLayer *text_layer;
 
 static char username[50];
 
+int received = 0;
+
 enum {
   BLANK,
   USER_KEY,
-  ADMIN_KEY,
+  ID_KEY,
+  NAME_KEY,
+  SIZE_KEY,
+  STATUS_KEY,
+  NUM_KEY
 };
 
 void out_sent_handler(DictionaryIterator *sent, void *context) {
-
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Sent");
 }
 
 void out_failed_handler(DictionaryIterator *failed, AppMessageResult reason, void *context) {
@@ -35,17 +41,34 @@ void in_dropped_handler(AppMessageResult reason, void *context) {
 }
 
 static void in_received_handler(DictionaryIterator *iter, void *context) {
-  Tuple *user = dict_find(iter, USER_KEY);
-  Tuple *admin = dict_find(iter, ADMIN_KEY);
+  Tuple *user_t = dict_find(iter, USER_KEY);
+  Tuple *id_t = dict_find(iter, ID_KEY);
+  Tuple *name_t = dict_find(iter, NAME_KEY);
+  Tuple *size_t = dict_find(iter, SIZE_KEY);
+  Tuple *status_t = dict_find(iter, STATUS_KEY);
+  Tuple *num_t = dict_find(iter, NUM_KEY);
 
-  if (user) {
-    strcpy(username, user->value->cstring);
+  if (user_t) {
+    strcpy(username, user_t->value->cstring);
     layer_remove_from_parent(text_layer_get_layer(text_layer));
     menu_layer_set_click_config_onto_window(menu_layer, window);
     layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
   }
-  if (admin) {
-    aqueues_show();     
+  if (id_t && name_t && size_t && status_t && num_t) {
+    received++;
+    char name[50];
+    int id = id_t->value->int32;
+    strcpy(name, name_t->value->cstring);
+    int size = size_t->value->int32;
+    int status = status_t->value->uint8;
+    int num = num_t->value->int32;
+    aqueue_add(size, id, name, status);
+    if (received == num) {
+      received = 0;
+      layer_remove_from_parent(text_layer_get_layer(text_layer));
+      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));  
+      aqueues_show();
+    }
   }
 }
 
@@ -93,6 +116,10 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
 }
 
 static void send_messages(char *type) {
+  layer_remove_from_parent(menu_layer_get_layer(menu_layer));
+  text_layer_set_text(text_layer, "Loading...");
+  // figure out how to disable button controls.
+  layer_add_child(window_layer, text_layer_get_layer(text_layer));  
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);
   dict_write_cstring(iter, 1, type);
@@ -108,7 +135,7 @@ void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index,
     send_messages("admin");
     break;
   case 1:
-    send_messages("member");
+    //    send_messages("member");
     mqueues_show();
     break;
   }

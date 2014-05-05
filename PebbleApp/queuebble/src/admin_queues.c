@@ -1,16 +1,26 @@
 #include <pebble.h>
 #include "admin_queues.h"
 #include "admin_queue.h"
+#include "mini-printf.h"
 
 // should eventually be parametrized by the num of queues
 // visible to the user
-#define NUM_MENU_ITEMS 1
 #define NUM_MENU_SECTIONS 1
+
+typedef struct queue {
+  char name[30];
+  int id;
+  int size;
+  int status;
+} queue;
 
 // Also need some struct for queues
 
 static Window *window;
 static MenuLayer *menu_layer;
+
+queue queues[20];
+int index = 0;
 
 // For functions below eventually cell_index-> row should index 
 // into an an array of queues and this would be dependent on the
@@ -18,11 +28,10 @@ static MenuLayer *menu_layer;
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
 				   MenuIndex *cell_index, void *data) {
-  switch (cell_index->row) {
-  case 0:
-    menu_cell_basic_draw(ctx, cell_layer, "Queue 0", "Size: 1 <OPEN>", NULL);
-    break;
-  }
+  int i = cell_index->row;
+  char sub[20];
+  mini_snprintf(sub, 19, "Size: %d <%s>", queues[i].size, queues[i].status ? "OPEN" : "CLOSED");
+  menu_cell_basic_draw(ctx, cell_layer, queues[i].name, sub, NULL);
 }
 
 // Here we draw what each header is                                    
@@ -50,7 +59,7 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer,
 					   uint16_t section_index, void *data) {
   switch (section_index) {
   case 0:
-    return NUM_MENU_ITEMS;
+    return index;
   default:
     return 0;
   }
@@ -104,4 +113,13 @@ void aqueues_deinit(void) {
 void aqueues_show(void) {
   const bool animated = true;
   window_stack_push(window, animated);
+}
+
+void aqueue_add(int size, int id, char* name, int status) {
+  queue q;
+  strcpy(q.name, name);
+  q.size = size;
+  q.id = id;
+  q.status = status;
+  queues[index++] = q;
 }
