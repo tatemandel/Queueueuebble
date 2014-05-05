@@ -15,7 +15,7 @@ from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.cache import never_cache
 from django.core.urlresolvers import resolve
 from django.views.decorators.csrf import csrf_exempt
-
+ 
 def index(request):
   return render(request, 'queue/index.html', {})
 
@@ -427,6 +427,7 @@ def password_change_done(request,
 def pebble_login(request):
   return render_to_response('queue/pebble_login.html')
 
+@csrf_exempt
 def pebble_validate(request):
   if request.method == 'POST':
     arr = request.POST.getlist('arr[]')
@@ -436,8 +437,7 @@ def pebble_validate(request):
 
     if user is not None:
       return HttpResponse(username, status=200)
-
-    return HttpResponse("Error", status=403)
+    return HttpResponse("Error", status=400)
 
 @csrf_exempt
 def pebble_get_admin(request):
