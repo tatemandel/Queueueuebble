@@ -51,8 +51,6 @@ function getOwned(username) {
   var params = "username=" + username;
   http.open("POST", "HTTP://54.84.161.157/pebble_get_admin/", true);
 
-  console.log("getOwned: " + username);
-
   http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   http.setRequestHeader("Content-length", params.length);
   http.setRequestHeader("Connection", "close");
@@ -67,8 +65,40 @@ function getOwned(username) {
         d["2"] = e['id'];
         d["3"] = e['name'];
         d["4"] = e['size'];
-        d["5"] = e['status'];
+        d["5"] = e['status'] == "true" ? 1 : 0;
         d["6"] = ob.length;
+        data.push(d);
+      });
+      sendMessages(data);
+    } else {
+      console.log(http.responseText);
+    }
+  }
+  http.send(params);
+}
+
+function getMember(username) {
+  var http = new XMLHttpRequest();
+  var params = "username=" + username;
+  http.open("POST", "HTTP://54.84.161.157/pebble_get_member/", true);
+
+  http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  http.setRequestHeader("Content-length", params.length);
+  http.setRequestHeader("Connection", "close");
+
+  http.onload = function() {
+    if (http.status == 200) {
+      console.log(http.responseText);
+      var ob = JSON.parse(http.responseText);
+      var data = [];
+      ob.forEach(function(e) { 
+        d = {};
+        d["2"] = e['id'];
+        d["3"] = e['name'];
+        d["5"] = e['status'] == "true" ? 1 : 0;
+        d["6"] = ob.length;
+        d["7"] = e['creator'];
+        d["8"] = e['position'];
         data.push(d);
       });
       sendMessages(data);
@@ -83,5 +113,7 @@ Pebble.addEventListener("appmessage", function(e) {
   console.log("Received message: " + e.payload[1] + " " + e.payload[2]);
   if (e.payload[1] == "admin") {
     getOwned(e.payload[2]);
+  } else if (e.payload[1] == "member") {
+    getMember(e.payload[2]);
   }
 });

@@ -7,20 +7,20 @@
 // visible to the user
 #define NUM_MENU_SECTIONS 1
 
-typedef struct queue {
-  char name[30];
+typedef struct aqueue {
+  char name[32];
   int id;
   int size;
   int status;
-} queue;
+} aqueue;
 
 // Also need some struct for queues
 
 static Window *window;
 static MenuLayer *menu_layer;
 
-queue queues[20];
-int index = 0;
+aqueue aqueues[20];
+int aindex = 0;
 
 // For functions below eventually cell_index-> row should index 
 // into an an array of queues and this would be dependent on the
@@ -29,9 +29,10 @@ int index = 0;
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
 				   MenuIndex *cell_index, void *data) {
   int i = cell_index->row;
+  if (i < 0) return;
   char sub[20];
-  mini_snprintf(sub, 19, "Size: %d <%s>", queues[i].size, queues[i].status ? "OPEN" : "CLOSED");
-  menu_cell_basic_draw(ctx, cell_layer, queues[i].name, sub, NULL);
+  mini_snprintf(sub, 19, "Size: %d <%s>", aqueues[i].size, aqueues[i].status ? "OPEN" : "CLOSED");
+  menu_cell_basic_draw(ctx, cell_layer, aqueues[i].name, sub, NULL);
 }
 
 // Here we draw what each header is                                    
@@ -59,7 +60,7 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer,
 					   uint16_t section_index, void *data) {
   switch (section_index) {
   case 0:
-    return index;
+    return aindex;
   default:
     return 0;
   }
@@ -115,11 +116,15 @@ void aqueues_show(void) {
   window_stack_push(window, animated);
 }
 
-void aqueue_add(int size, int id, char* name, int status) {
-  queue q;
+void aqueues_add(int size, int id, char* name, int status) {
+  aqueue q;
   strcpy(q.name, name);
   q.size = size;
   q.id = id;
   q.status = status;
-  queues[index++] = q;
+  aqueues[aindex++] = q;
+}
+
+void aqueues_reset() {
+  aindex = 0;
 }

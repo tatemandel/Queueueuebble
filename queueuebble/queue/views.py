@@ -15,7 +15,7 @@ from django.views.decorators.debug import sensitive_post_parameters
 from django.views.decorators.cache import never_cache
 from django.core.urlresolvers import resolve
 from django.views.decorators.csrf import csrf_exempt
-
+ 
 def index(request):
   return render(request, 'queue/index.html', {})
 
@@ -427,6 +427,7 @@ def password_change_done(request,
 def pebble_login(request):
   return render_to_response('queue/pebble_login.html')
 
+@csrf_exempt
 def pebble_validate(request):
   if request.method == 'POST':
     arr = request.POST.getlist('arr[]')
@@ -436,8 +437,7 @@ def pebble_validate(request):
 
     if user is not None:
       return HttpResponse(username, status=200)
-
-    return HttpResponse("Error", status=403)
+    return HttpResponse("Error", status=400)
 
 @csrf_exempt
 def pebble_get_admin(request):
@@ -458,3 +458,25 @@ def pebble_get_admin(request):
       return HttpResponse("Invalid username", status=400)
   else:
     return HttpResponse("Nothing to get", status=400)
+
+@csrf_exempt
+def pebble_get_member(request):
+  if request.method == 'POST':
+    username = request.POST['username']
+    user = User.objects.get(username=username)
+    if user is not None:
+      puser = UserProfile.objects.get(user=user)
+      data = []
+      for n in Node.objects.filter(user=puser):
+        d = { 'name' : n.queue.name,
+              'creator' : n.queue.creator.user.username,
+              'position' : n.position,
+              'status' : n.queue.closed,
+              'id' : n.queue.id }
+        data.append(d)
+      return HttpResponse(json.dumps(data), content_type="application/json")
+    else:
+      return HttpResponse("Invalid username", status=400)
+  else:
+    return HttpResponse("Nothing to get", status=400)
+
