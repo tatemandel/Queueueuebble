@@ -12,23 +12,26 @@ Pebble.addEventListener("showConfiguration",
 );
 
 function sendMessages(messages) {
-  var failed = [];
 
-  function sendMessage(message) {
+  function sendNextMessage() {
+    if (messages.length == 0) {
+      return;
+    }
+
+    var message = messages.shift();
     Pebble.sendAppMessage(message,
       function(e) {
-        // ack yay
+        console.log("ack");
+        sendNextMessage();
       },
       function(e) {
-        failed.push(message);
+        console.log("nack");
+        messages.unshift(message);
+        sendNextMessage();
       }
     );
   }
-
-  while (messages.length > 0) {
-    messages.forEach(sendMessage);
-    messages = failed;
-  }
+  sendNextMessage();
 }
 
 Pebble.addEventListener("webviewclosed", function(e) {
