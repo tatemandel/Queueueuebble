@@ -1,6 +1,11 @@
-<h1>{{ username }}'s Profile</h1>
+{% extends 'base.html' %}
 
-<h2>Queues</h2>
-{% for q in owned %}
-  <a href="/profile/{{ username }}/{{ q.id }}">{{ q.name }}</a><br/>
-{% endfor %}
+{% block content %}
+	<div class="col-sm-8 col-md-12  main">
+		<h1 class="page-header">{{ username }}'s Queues</h1>
+
+		{% for q in owned %}
+	  	<a href="/profile/{{ username }}/{{ q.id }}">{{ q.name }}</a><br/>
+		{% endfor %}
+	</div>
+{% endblock %}

@@ -1,25 +1,42 @@
-<p>You searched for: <strong>{{ query }}</strong></p>
+{% extends 'base.html' %}
 
-{% if queues %}
-  <p>Found {{ queues|length }} queue{{ queues|pluralize }}.</p>
-  <ul>
-    {% for queue in queues %}
-    <li>
-      <a href="/profile/{{ queue.creator.user.username }}/{{ queue.id }}/">
-        {{ queue.name }}
-      </a>
-    </li>
-    {% endfor %}
-  </ul><br/>
-{% endif %}
-{% if users %}
-  <p>Found {{ users|length }} user{{ users|pluralize }}.</p>
-  <ul>
-    {% for u in users %}
-    <li><a href="/profile/{{ u.username }}/">{{ u.username }}</a></li>
-    {% endfor %}
-  </ul>
-{% endif %}
-{% if not queues and not users %}
-  <p>No results found</p>
-{% endif %}
+{% block content %}
+<div class="col-sm-8 col-md-12  main">
+  <h1 class="page-header">Search Results for: <strong>{{ query }}</strong></h1>
+
+  <div class="row">
+  <div class="col-md-6">
+    <h3> Queues containing "{{ query }}" </h3>
+    {% if queues %}
+      <p>Found {{ queues|length }} queue{{ queues|pluralize }}.</p>
+      <ul>
+        {% for queue in queues %}
+        <li>
+          <a href="/profile/{{ queue.creator.user.username }}/{{ queue.id }}/">
+            {{ queue.name }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul><br/>
+    {% else %}
+      <p>No queue matches {{ query }}.</p>
+    {% endif %}
+  </div>
+
+  <div class="col-md-6">
+    <h3> Users containing "{{ query }}" </h3>
+    {% if users %}
+      <p>Found {{ users|length }} user{{ users|pluralize }}.</p>
+      <ul>
+        {% for u in users %}
+        <li><a href="/profile/{{ u.username }}/">{{ u.username }}</a></li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% if not queues and not users %}
+      <p>No user found</p>
+    {% endif %}
+  </div>
+  </div>
+</div>
+{% endblock %}
