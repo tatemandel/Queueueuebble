@@ -2,7 +2,6 @@
 #include "admin_queue.h"
 #include "admin.h"
 
-// should eventually be parametrized by the num of members in the queue
 #define NUM_MENU_ITEMS 1
 #define NUM_MENU_SECTIONS 1
 
@@ -10,6 +9,11 @@
 
 static Window *window;
 static MenuLayer *menu_layer;
+
+enum {
+  BLANK,
+  INIT_RESPONSE,
+};
 
 // For functions below eventually cell_index-> row should index 
 // into an an array of members and this would be dependent on the
@@ -56,8 +60,7 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer,
   }
 }
 
-static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, 
-			  void *data) {
+static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   switch (cell_index->row) {
   case 0:
     admin_show(); //should take in a member

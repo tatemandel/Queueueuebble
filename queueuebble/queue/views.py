@@ -427,23 +427,56 @@ def password_change_done(request,
 def pebble_login(request):
   return render_to_response('queue/pebble_login.html')
 
-@csrf_exempt
-def pebble_get_queues(request):
+def pebble_validate(request):
   if request.method == 'POST':
-    username = request.POST['username']
-    password = request.POST['password']
+    arr = request.POST.getlist('arr[]')
+    username = arr[0]
+    password = arr[1]
     user = authenticate(username=username, password=password)
 
     if user is not None:
-        puser = UserProfile.objects.get(user=user)
-        data = []
-        for n in Node.objects.filter(user=puser):
-          d = { 'creator' : n.queue.creator.user.username,
-                'name' : n.queue.name,
-                'id' : n.queue.id }
-          data.append(d)
-        return HttpResponse(json.dumps(data), content_type="application/json")
+      return HttpResponse(username, status=200)
+
+    return HttpResponse("Error", status=403)
+
+@csrf_exempt
+def pebble_get_admin(request):
+  if request.method == 'POST':
+    username = request.POST['username']
+    user = User.objects.get(username=username)
+    if user is not None:
+      puser = UserProfile.objects.get(user=user)
+      data = []
+      for q in Queue.objects.filter(owner=puser):
+        d = { 'name' : q.name,
+              'id' : q.id,
+              'size' : q.size,
+              'status' : q.closed }
+        data.append(d)
+      return HttpResponse(json.dumps(data), content_type="application/json")
     else:
-      return HttpResponse("Invalid login information!")
+      return HttpResponse("Invalid username", status=400)
   else:
-    return HttpResponse("No login information provided!")
+    return HttpResponse("Nothing to get", status=400)
+
+@csrf_exempt
+def pebble_get_member(request):
+  if request.method == 'POST':
+    username = request.POST['username']
+    user = User.objects.get(username=username)
+    if user is not None:
+      puser = UserProfile.objects.get(user=user)
+      data = []
+      for n in Node.objects.filter(user=puser):
+        d = { 'name' : n.queue.name,
+              'creator' : n.queue.creator.user.username,
+              'position' : n.position,
+              'status' : n.queue.closed,
+              'id' : n.queue.id }
+        data.append(d)
+      return HttpResponse(json.dumps(data), content_type="application/json")
+    else:
+      return HttpResponse("Invalid username", status=400)
+  else:
+    return HttpResponse("Nothing to get", status=400)
+
