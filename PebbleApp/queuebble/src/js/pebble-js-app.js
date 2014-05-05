@@ -136,6 +136,12 @@ function getQueue(id, type) {
       console.log(http.responseText);
       var ob = JSON.parse(http.responseText);
       var data = [];
+      if (ob.length == 0) {
+        d = {};
+	d["10"] = 3;
+	d["9"] = type;
+        data.push(d);  
+      }
       ob.forEach(function(e) { 
         d = {};
         d["1"] = e['username'];

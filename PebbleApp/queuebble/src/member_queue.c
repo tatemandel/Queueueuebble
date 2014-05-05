@@ -9,6 +9,7 @@
 
 static Window *window;
 static MenuLayer *menu_layer;
+static TextLayer *text_layer;
 
 // For functions below eventually cell_index-> row should index 
 // into an an array of members and this would be dependent on the
@@ -83,13 +84,34 @@ static void window_load(Window *window) {
     .select_click = menu_select_callback, 
   });
 
-  menu_layer_set_click_config_onto_window(menu_layer, window);
+  text_layer = text_layer_create(bounds);
+  text_layer_set_text(text_layer, "There are no members in your queue. Encourage users to join your queue.");
 
-  layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  if (msize > 0) {
+    menu_layer_set_click_config_onto_window(menu_layer, window);
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  }
+  else {
+    window_set_click_config_provider(window, NULL);
+    layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  }
 }
 
 static void window_unload(Window *window) {
   menu_layer_destroy(menu_layer);
+}
+
+static void window_appear(Window *window) {
+  Layer *window_layer = window_get_root_layer(window);
+  layer_remove_child_layers(window_layer);
+  if (msize > 0) {
+    menu_layer_set_click_config_onto_window(menu_layer, window);
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  }
+  else {
+    window_set_click_config_provider(window, NULL);
+    layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  }
 }
 
 void mqueue_init(void) {
@@ -97,6 +119,7 @@ void mqueue_init(void) {
   window_set_window_handlers(window, (WindowHandlers) {
     .load = window_load,
     .unload = window_unload,
+    .appear = window_appear,
   });
 }
 
