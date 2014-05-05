@@ -438,3 +438,22 @@ def pebble_validate(request):
       return HttpResponse(username, status=200)
 
     return HttpResponse("Error", status=403)
+
+@csrf_exempt
+def pebble_get_admin(request):
+  if request.method == 'POST':
+    username = request.POST['username']
+    user = User.objects.get(username=username)
+    if user is not None:
+      puser = UserProfile.objects.get(user=user)
+      data = []
+      for q in Queue.objects.filter(owner=puser):
+        d = { 'name' : q.name,
+              'id' : q.id,
+              'size' : q.size }
+        data.append(d)
+      return HttpResponse(json.dumps(data), content_type="application/json")
+    else:
+      return HttpResponse("Invalid username", status=400)
+  else:
+    return HttpResponse("Nothing to get", status=400)
