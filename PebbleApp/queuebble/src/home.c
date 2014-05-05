@@ -19,13 +19,15 @@ static char username[50];
 int received = 0;
 
 enum {
-  BLANK,
-  USER_KEY,
-  ID_KEY,
-  NAME_KEY,
-  SIZE_KEY,
-  STATUS_KEY,
-  NUM_KEY
+  BLANK, // 0
+  USER_KEY, // 1
+  ID_KEY, // 2
+  NAME_KEY, // 3
+  SIZE_KEY, // 4
+  STATUS_KEY, // 5
+  NUM_KEY, // 6
+  CREATOR_KEY, // 7
+  POSITION_KEY, // 8
 };
 
 void out_sent_handler(DictionaryIterator *sent, void *context) {
@@ -47,6 +49,8 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
   Tuple *size_t = dict_find(iter, SIZE_KEY);
   Tuple *status_t = dict_find(iter, STATUS_KEY);
   Tuple *num_t = dict_find(iter, NUM_KEY);
+  Tuple *creator_t = dict_find(iter, CREATOR_KEY);
+  Tuple *pos_t = dict_find(iter, POSITION_KEY);
 
   if (user_t) {
     strcpy(username, user_t->value->cstring);
@@ -57,17 +61,35 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
   if (id_t && name_t && size_t && status_t && num_t) {
     received++;
     char name[50];
-    int id = id_t->value->int32;
     strcpy(name, name_t->value->cstring);
+    int id = id_t->value->int32;
     int size = size_t->value->int32;
     int status = status_t->value->uint8;
     int num = num_t->value->int32;
-    aqueue_add(size, id, name, status);
+    aqueues_add(size, id, name, status);
     if (received == num) {
       received = 0;
       layer_remove_from_parent(text_layer_get_layer(text_layer));
       layer_add_child(window_layer, menu_layer_get_layer(menu_layer));  
       aqueues_show();
+    }
+  }
+ if (id_t && name_t && status_t && num_t && creator_t && pos_t) {
+    received++;
+    char name[50];
+    strcpy(name, name_t->value->cstring);
+    char creator[50];
+    strcpy(creator, creator_t->value->cstring);
+    int id = id_t->value->int32;
+    int status = status_t->value->uint8;
+    int num = num_t->value->int32;
+    int pos = pos_t->value->int32;
+    mqueues_add(name, creator, pos, id, status);
+    if (received == num) {
+      received = 0;
+      layer_remove_from_parent(text_layer_get_layer(text_layer));
+      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));  
+      mqueues_show();
     }
   }
 }
@@ -132,11 +154,12 @@ void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index,
 			  void *data) {
   switch (cell_index->row) {
   case 0:
+    aqueues_reset();
     send_messages("admin");
     break;
   case 1:
-    //    send_messages("member");
-    mqueues_show();
+    mqueues_reset();
+    send_messages("member");
     break;
   }
 }

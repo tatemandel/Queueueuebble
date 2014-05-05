@@ -1,17 +1,26 @@
 #include <pebble.h>
 #include "member_queues.h"
 #include "member_queue.h"
+#include "mini-printf.h"
 
 // should eventually be parametrized by the num of queues
 // visible to the user
-#define NUM_MENU_ITEMS 1
 #define NUM_MENU_SECTIONS 1
 
-// Also need some struct for queues
+typedef struct mqueue {
+  char name[32];
+  char creator[32];
+  int id;
+  int pos;
+  int status;
+} mqueue;
 
 
 static Window *window;
 static MenuLayer *menu_layer;
+
+mqueue mqueues[20];
+int mindex = 0;
 
 // For functions below eventually cell_index-> row should index 
 // into an an array of queues and this would be dependent on the
@@ -19,18 +28,21 @@ static MenuLayer *menu_layer;
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
 				   MenuIndex *cell_index, void *data) {
-  switch (cell_index->row) {
-  case 0:
-    menu_cell_basic_draw(ctx, cell_layer, "Queue 0", "Owner: tateo <OPEN>", NULL);
-    break;
-  }
+  int i = cell_index->row;
+  if (i < 0) return;
+  char title[20];
+  mini_snprintf(title, 19, "%s (%s)", mqueues[i].name, mqueues[i].creator);
+  char sub[20];
+  mini_snprintf(sub, 19, "Position: %d <%s>", mqueues[i].pos + 1, 
+                mqueues[i].status == 0 ? "OPEN" : "CLOSED");
+  menu_cell_basic_draw(ctx, cell_layer, title, sub, NULL);
 }
 
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, 
 					   uint16_t section_index, void *data) {
   switch (section_index) {
   case 0:
-    return NUM_MENU_ITEMS;
+    return mindex;
   default:
     return 0;
   }
@@ -105,4 +117,18 @@ void mqueues_deinit(void) {
 void mqueues_show(void) {
   const bool animated = true;
   window_stack_push(window, animated);
+}
+
+void mqueues_add(char *name, char *creator, int pos, int id, int status) {
+  mqueue q;
+  strcpy(q.name, name);
+  strcpy(q.creator, creator);
+  q.id = id;
+  q.pos = pos;
+  q.status = status;
+  mqueues[mindex++] = q;
+}
+
+void mqueues_reset() {
+  mindex = 0;
 }
