@@ -60,6 +60,11 @@ function getOwned(username) {
       console.log(http.responseText);
       var ob = JSON.parse(http.responseText);
       var data = [];
+      if (ob.length == 0) {
+        d = {};
+	d["10"] = 1;
+        data.push(d);  
+      }
       ob.forEach(function(e) { 
         d = {};
         d["2"] = e['id'];
@@ -91,6 +96,11 @@ function getMember(username) {
       console.log(http.responseText);
       var ob = JSON.parse(http.responseText);
       var data = [];
+      if (ob.length == 0) {
+        d = {};
+	d["10"] = 2;
+        data.push(d);  
+      }
       ob.forEach(function(e) { 
         d = {};
         d["2"] = e['id'];

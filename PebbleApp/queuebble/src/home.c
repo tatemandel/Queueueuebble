@@ -28,6 +28,8 @@ enum {
   NUM_KEY, // 6
   CREATOR_KEY, // 7
   POSITION_KEY, // 8
+  FILLER_KEY, // 9
+  NO_DATA_KEY, // 10
 };
 
 void out_sent_handler(DictionaryIterator *sent, void *context) {
@@ -51,6 +53,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
   Tuple *num_t = dict_find(iter, NUM_KEY);
   Tuple *creator_t = dict_find(iter, CREATOR_KEY);
   Tuple *pos_t = dict_find(iter, POSITION_KEY);
+  Tuple *no_data_t = dict_find(iter, NO_DATA_KEY);
 
   if (user_t) {
     strcpy(username, user_t->value->cstring);
@@ -70,7 +73,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     if (received == num) {
       received = 0;
       layer_remove_from_parent(text_layer_get_layer(text_layer));
-      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));  
+      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
       aqueues_show();
     }
   }
@@ -88,10 +91,20 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     if (received == num) {
       received = 0;
       layer_remove_from_parent(text_layer_get_layer(text_layer));
-      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));  
+      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
       mqueues_show();
     }
-  }
+ }
+ if (no_data_t) {
+   layer_remove_from_parent(text_layer_get_layer(text_layer));
+   layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+   if (no_data_t->value->int32 == 1) { 
+     aqueues_show();
+   }
+   else if (no_data_t->value->int32 == 2) {
+     mqueues_show();
+   }   
+ }
 }
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
