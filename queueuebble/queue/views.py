@@ -176,20 +176,21 @@ def profile_id(request, username, uid):
       fav = False
     if ('addMyself' in request.POST) and not queue.contains(p):
       node = Node(user=p, queue=queue, position=qsize)
-      queue.size = qsize + 1
+      queue.size = queue.size + 1
       queue.save()
       node.save()
       contains = True
     if 'removeMyself' in request.POST:
       if not user_node == None:
         del_pos = user_node.position
+        if queue.size > 1 and del_pos < 2:
+            nextUserNode = None
+            nextUserNode = nodes[2]
+            uNextUser = nextUserNode.user.user
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [uNextUser.email], fail_silently=False)
         user_node.delete()
         queue.size = queue.size - 1
         queue.save()
-        if queue.size > 0:
-            nextUserNode = nodes[del_pos + 1]
-            uNextUser = nextUserNode.user.user
-            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [uNextUser.email], fail_silently=False)
         nodes = list(Node.objects.filter(queue=queue))
         for n in nodes:
           if n.position > del_pos:
@@ -205,12 +206,13 @@ def profile_id(request, username, uid):
         if not len(uRemoveNodes) == 0:
           uRemoveNode = uRemoveNodes[0];
           uRemovePos = uRemoveNode.position
-          uRemoveNode.delete();
-          queue.size = queue.size - 1
-          if queue.size > 0:
-            nextUserNode = nodes[uRemovePos + 1]
+          if queue.size > 1 and uRemovePos < 2:
+            nextUserNode = None
+            nextUserNode = nodes[2]
             uNextUser = nextUserNode.user.user
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [uNextUser.email], fail_silently=False)
+          uRemoveNode.delete()
+          queue.size = queue.size - 1
           queue.save();
           nodes = list(Node.objects.filter(queue=queue))
           for n in nodes:
@@ -502,11 +504,15 @@ def pebble_update_status(request):
     qid = request.POST['id']
     username = request.POST['username']
     typ = request.POST['type']
+    print typ
+    print username
+    print qid
     user = User.objects.get(username=username)
     puser = UserProfile.objects.get(user=user)
     queue = Queue.objects.get(id=qid)
-    node = Node.objects.get(queue=queue, user=puser)
-
+    nodes = Node.objects.filter(queue=queue, user=puser)
+    node = nodes[0]
+    print node
     if typ == "nstart":
       node.changeStatus("Not started")
       node.save()
@@ -514,13 +520,15 @@ def pebble_update_status(request):
       node.changeStatus("In progress")
       node.save()
     elif typ == "remove":
-      del_pos = node.pos
+      del_pos = node.position
       node.delete()
       queue.size = queue.size - 1
       queue.save()
       nodes = list(Node.objects.filter(queue=queue))
       for n in nodes:
         if n.position > del_pos:
+          print n.user.user.username
+          print n.position
           n.position = n.position - 1
           n.save()
     elif typ == "up":
