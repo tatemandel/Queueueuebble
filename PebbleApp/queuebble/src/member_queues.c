@@ -34,7 +34,7 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer,
   char title[20];
   mini_snprintf(title, 19, "%s (%s)", mqueues[i].name, mqueues[i].creator);
   char sub[20];
-  mini_snprintf(sub, 19, "Position: %d <%s>", mqueues[i].pos + 1, 
+  mini_snprintf(sub, 19, "Position: %d <%s>", mqueues[i].pos, 
                 mqueues[i].status == 0 ? "OPEN" : "CLOSED");
   menu_cell_basic_draw(ctx, cell_layer, title, sub, NULL);
 }
