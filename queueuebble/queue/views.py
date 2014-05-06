@@ -153,6 +153,7 @@ def profile_id(request, username, uid):
   nodes = list(Node.objects.filter(queue=queue))
   nodes.sort(key=lambda x: x.position)
   qsize = queue.size
+
   p = UserProfile.objects.get(user=request.user)
   myqueue = p in queue.owner.all()
   contains = queue.contains(p)
@@ -194,7 +195,7 @@ def profile_id(request, username, uid):
             n.position = n.position - 1
             if (n.position == 1):
               send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email],  fail_silently=False)
-              n.save()
+          n.save()
       contains = False
     if 'removeFromMyQueue' in request.POST:
       uRemoveName = request.POST.get('nodeToRemove2')
