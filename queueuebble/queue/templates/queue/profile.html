@@ -2,7 +2,7 @@
 
 {% block content %}
 	<div class="col-sm-8 col-md-12  main">
-		<h1 class="page-header">{{ username }}'s Queues</h1>
+		<h1 class="page-header">Queues owned by {{ username }} </h1>
 
 		{% for q in owned %}
 	  	<a href="/profile/{{ username }}/{{ q.id }}">{{ q.name }}</a><br/>

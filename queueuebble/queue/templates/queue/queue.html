@@ -1,343 +1,436 @@
-<head>
-  <style>
-    form {
-      margin-bottom: 4px;
-    }
-    #features {
-      margin: auto;
-      width: 460px;
-      font-size: 0.9em;
-    }
-    .connected, .sortable, .exclude, .handles {
-      margin: auto;
-      padding: 0;
-      width: 310px;
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -khtml-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-    }
-    .sortable.grid {
-      overflow: hidden;
-    }
-    .connected li, .sortable li, .exclude li, .handles li {
-      list-style: none;
-      border: 1px solid #CCC;
-      background: #F6E6B6;
-      font-family: "Tahoma";
-      color: #1C94C4;
-      margin: 5px;
-      padding: 5px;
-      height: 140px;
-    }
-    .handles span {
-      cursor: move;
-    }
-    li.disabled {
-      opacity: 0.5;
-    }
-    
-    li.highlight {
-      background: #FDEFC8;
-    }
-    
-    li.sortable-placeholder {
-      border: 1px dashed #CCC;
-      background: none;
-    }
-
-    label.status {
-      padding-bottom: 5px;
-      color: #aaaaaa;
-      font-size: 0.7em;
-    }
-    body { 
-            padding-top: 100px; 
-        }
-  </style>
-</head>
 
 {% load staticfiles %}
 
-
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="description" content="">
-        <meta name="author" content="">
-        <link rel="shortcut icon" href="../../assets/ico/favicon.ico">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="../../assets/ico/favicon.ico">
+    
+    <title>
+      Queuebble
+    </title>
+    
+    <!-- Bootstrap core CSS -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/bootstrap-theme.css" rel="stylesheet">
+    
+    <!-- Custom styles for this template -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- skin -->
+    <link rel="stylesheet" href="/static/css/default.css">
+    
+    <!-- Just for debugging purposes. Don't actually copy this line! -->
+    <!--[if lt IE 9]>
+<script src="../../assets/js/ie8-responsive-file-warning.js"></script>
+<![endif]-->
+    
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+    
+    <style>
+      form {
+        margin-bottom: 4px;
+      }
+      
+      .queue .manage {
+        box-shadow: 0 0 0 10px 
+          rgba(150, 150, 150, 0.1), 0 1px 3px 
+          rgba(25, 25, 25, 0.3), 0 10px 15px
+          rgba(200, 200, 200, 0.1) inset;
+      }
 
-        <title> Queuebble</title>
+      .connected, .sortable, .exclude, .handles {
+        margin: auto;
+        padding: 0;
+        width: 310px;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+      .sortable.grid {
+        overflow: hidden;
+      }
+      .connected li, .sortable li, .exclude li, .handles li {
+        list-style: none;
+        border: 1px solid #CCC;
+        background: #f2f3f4 ;
+        font-family: "Tahoma";
+        color: #1C94C4;
+        margin: 5px;
+        padding: 5px;
+        height: 140px;
+      }
+      .handles span {
+        cursor: move;
+      }
+      li.disabled {
+        opacity: 0.5;
+      }
+      
+      li.highlight {
+        background: #a4ddcb;
+      }
+      
+      li.sortable-placeholder {
+        border: 1px dashed #CCC;
+        background: none;
+      }
+      
+      label.status {
+        padding-bottom: 5px;
+        color: #aaaaaa;
+        font-size: 0.7em;
+      }
 
-        <!-- Bootstrap core CSS -->
-        <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-        <link href="/static/css/bootstrap-theme.css" rel="stylesheet">
-
-        <!-- Custom styles for this template -->
-        <link rel="stylesheet" href="/static/css/style.css">
-        <!-- skin -->
-        <link rel="stylesheet" href="/static/css/default.css">
-
-        <!-- Just for debugging purposes. Don't actually copy this line! -->
-        <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
-
-        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-        <![endif]-->
-    </head>
-
-    <body>
-        <section id="header" class="appear"></section>
-        <div class="navbar navbar-inverse navbar-fixed-top" role="navigation" data-0="line-height:100px; height:100px; background-color:rgba(0,0,0,0.3);" data-300="line-height:60px; height:60px; background-color:rgba(0,0,0,1);">
-             <div class="container" style="height:100px;">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                        <span class="fa fa-bars color-white"></span>
-                    </button>
-                    <h1><a class="navbar-brand" href="/" data-0="line-height:90px;" data-300="line-height:50px;">          Queuebble
-                    </a></h1>
-                </div>
-                <div class="navbar-collapse collapse">
-                    <ul class="nav navbar-nav" style="margin-top:20px;" data-300="margin-top:5px;">
-                        <li class="active"><a href="/">Home</a></li>
-                         {% if user.is_authenticated %}
-                        <li><a href="/dashboard/"> {{user.username}}'s Dashboard</a></li>
-                        <li><a href="/logout/">Log Out</a></li>
-
-                        {% else %}
-                        <li><a href="/login/">Log In</a></li>
-                        <li><a href="#" data-toggle="modal" data-target="#registerModal">Register</a></li>
-                        {% endif %}
-                    </ul>
-                </div><!--/.navbar-collapse -->
-            </div>
+    </style>
+    
+  </head>
+  
+  <body>
+    <section id="header" class="appear">
+    </section>
+    <div class="navbar navbar-fixed-top" role="navigation" data-0="line-height:100px; height:100px; background-color:rgba(0,0,0,0.3);" data-300="line-height:60px; height:60px; background-color:rgba(0,0,0,1);">
+      <div class="container" style="height:100px;">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="fa fa-bars color-white">
+            </span>
+          </button>
+          <h1>
+            <a class="navbar-brand" href="/" data-0="line-height:90px;" data-300="line-height:50px;">
+              Queuebble
+            </a>
+          </h1>
         </div>
-
-
-        <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true" data-remote="/register/">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                </div>
-            </div>
-        </div>
-
-
-        <div class="container-fluid">
-
-<h1>
-  {{ queue.name }}
-</h1>
-
-<h3>{{ username }}'s Queue</h3>
-{% if queue.closed %}
-  <p>This queue is closed</p>
-{% else %}
-  <p>This queue is open</p>
-{% endif %}
-
-{% if myqueue %}
-  <form method="post" id="open_close" action="/profile/{{ username }}/{{ uid }}/">
-    {% csrf_token %}
-    {% if queue.closed %}
-      <input type="submit" name="openClose" value="Open Queue">
-    {% else %}
-      <input type="submit" name="openClose" value="Close Queue">
-    {% endif %}
-  </form>
-  <form method="post" id="destroy_queue" action="/profile/{{ username }}/{{ uid }}/">
-    {% csrf_token %}
-      <input type="submit" name="destroy" value="Destroy Queue">
-  </form>
-{% endif %}
-
-<h3>Owners</h3>
-<ul>
-  {% for owner in owners %}
-    <li>{{ owner.user.username }}</li>
-  {% endfor %}
-</ul>
-{% if myqueue %}
-  <h3>Add Owner</h3>
-  <form method="post" id="add_owner" action="/profile/{{ username }}/{{ uid }}/">
-    {% csrf_token %}
-    Username: <input type="text" name="newowner"/>
-    <input type="submit" name="addOwner" value="Submit">
-  </form>
-{% endif %}
-
-{% if not myqueue %}
-  {% if fav %}
-    <form method="post" id="remove_favorite" action="/profile/{{ username }}/{{ uid }}/">
-      {% csrf_token %}
-      <input type="submit" name="removeFavorite" value="Remove from Favorites"/>
-    </form>
-  {% else %}
-    <form method="post" id="add_favorite" action="/profile/{{ username }}/{{ uid }}/">
-      {% csrf_token %}
-      <input type="submit" name="addFavorite" value="Add to Favorites"/>
-    </form>
-  {% endif %}
-{% endif %}
-
-{% if not contains and not myqueue and not queue.closed %}
-  <form id="add_to_queue_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
-    {% csrf_token %}
-    <input type="submit" name="addMyself" value="Add myself to this queue"/>
-  </form>
-{% endif %}
-
-{% if contains %}
-  {% if user_node.position == 1 %}
-    <h4>There is {{ user_node.position }} person in front of you.</h4>
-  {% else %}
-    <h4>There are {{ user_node.position }} people in front of you.</h4>
-  {% endif %}
-{% endif %}
-
-<ul id="sortable1" class="sortable list">
-  {% for n in nodes %}
-    {% if n == user_node %}
-      <li draggable="true" user="{{ n.user }}" class="highlight">
-        <strong>{{ n.user }}</strong>
-        <br> <label class='status'> status: {{ n.getStatus }} </label>
-        <form id="remove_myself_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
-          {% csrf_token %}
-          <input type="submit" name="removeMyself" value="Remove myself from this queue"/>
-        </form>
-      </li>
-    {% else %}
-      <li draggable="true" user="{{ n.user }}" >
-        {{ n.user }}
-        <br> <label class = 'status'> status: {{n.getStatus}}</label>
-        {% if myqueue %}
-          <form id="change_status_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
-            {% csrf_token %}
-            {% if n.getStatus == "Not started" %}
-              <input type="submit" name="changeStatus" value="Change to in progess"/>
-            {% elif n.getStatus == "In progress" %}
-              <input type="submit" name="changeStatus" value="Change to completed"/>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav" style="margin-top:20px;" data-300="margin-top:5px;">
+            <li class="active">
+              <a href="/">
+                Home
+              </a>
+            </li>
+            {% if user.is_authenticated %}
+            <li>
+              <a href="/dashboard/">
+                {{user.username}}'s Dashboard
+              </a>
+            </li>
+            <li>
+              <a href="/logout/">
+                Log Out
+              </a>
+            </li>
+            
             {% else %}
-              <input type="hidden" name="changeStatus">
+            <li>
+              <a href="/login/">
+                Log In
+              </a>
+            </li>
+            <li>
+              <a href="#" data-toggle="modal" data-target="#registerModal">
+                Register
+              </a>
+            </li>
             {% endif %}
-            <input type="hidden" name="statusChangeUser" value="{{ n.user }}"/>
-          </form>
-          <form id="remove_from_myqueue_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
-            {% csrf_token %}
-            <input type="hidden" name="nodeToRemove2" value="{{ n.user }}"/>
-            <input type="submit" name="removeFromMyQueue" value="Remove this person from my Queue"/>
-          </form>
+          </ul>
+        </div>
+        <!--/.navbar-collapse -->
+      </div>
+    </div>
+    
+    
+    <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="basicModal" aria-hidden="true" data-remote="/register/">
+      <div class="modal-dialog">
+        <div class="modal-content">
+        </div>
+      </div>
+    </div>
+    
+    
+    <div class="container-fluid">
+      <div class="col-sm-8 col-md-12  main">
+        <h1 class="page-header">
+          {{ queue.name }} 
+          <small>
+            created by {{ username }} 
+          </small>
+        </h1>
+        
+        {% if contains %}
+        {% if user_node.position == 1 %}
+        <h4>
+          There is {{ user_node.position }} person in front of you.
+        </h4>
+        {% else %}
+        <h4>
+          There are {{ user_node.position }} people in front of you.
+        </h4>
         {% endif %}
-      </li>
-    {% endif %}
-  {% endfor %}
-  {% if not qsize == 0 and myqueue %}
-  {% endif %}
-</ul>
-{% if myqueue %}
-  <!-- <input draggable='false' type="hidden" name="reorderData" id="reorderData"/> -->
-  <input type="submit" id="confirmReorder" value="Submit Reordering"/>
-  <div id="status-area"></div>
-  <div id="reorderResponse"></div>
-{% endif %}
-{% if myqueue %}
-  <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js">
-  </script>
-  <script type="text/javascript" src="http://farhadi.ir/projects/html5sortable/jquery.sortable.js">
-  </script>
-  <script>
-      (function($) {
-          $.fn.flash_message = function(options) {
+        {% endif %}
+        
+        <div class="row">
+          <div class="col-md-5 queue">
+            <h3> Queue  <br>
+              {% if myqueue %}
+              <small> Drag and drop boxes to reorder </small>
+              {% endif %}
+            </h3>
 
+            <ul id="sortable1" class="sortable list">
+              {% for n in nodes %}
+              {% if n == user_node %}
+              <li draggable="true" user="{{ n.user }}" class="highlight">
+                <a href="../../{{ n.user }}/"> 
+                  <strong>
+                  {{ n.user }} 
+                  </strong>
+                </a>
+                <br>
+                
+                <label class='status'>
+                  status: {{ n.getStatus }} 
+                </label>
+                <form id="remove_myself_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
+                  {% csrf_token %}
+                  <input type="submit" name="removeMyself" value="Remove myself from this queue"/>
+                </form>
+              </li>
+              {% else %}
+              <li draggable="true" user="{{ n.user }}" >
+                <a href="../../{{ n.user }}/">           
+                  {{ n.user }} 
+                </a>
+                <br>
+                
+                <label class = 'status'>
+                  status: {{n.getStatus}}
+                </label>
+                {% if myqueue %}
+                <form id="change_status_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
+                  {% csrf_token %}
+                  {% if n.getStatus == "Not started" %}
+                  <input type="submit" name="changeStatus" value="Change to in progess"/>
+                  {% elif n.getStatus == "In progress" %}
+                  <input type="submit" name="changeStatus" value="Change to completed"/>
+                  {% else %}
+                  <input type="hidden" name="changeStatus">
+                  {% endif %}
+                  <input type="hidden" name="statusChangeUser" value="{{ n.user }}"/>
+                </form>
+                
+                <form id="remove_from_myqueue_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
+                  {% csrf_token %}
+                  <input type="hidden" name="nodeToRemove2" value="{{ n.user }}"/>
+                  <input type="submit" name="removeFromMyQueue" value="Remove this person from my Queue"/>
+                </form>
+                {% endif %}
+              </li>
+              {% endif %}
+              {% endfor %}
+
+              {% if not qsize == 0 and myqueue %}
+                <!-- <input draggable='false' type="hidden" name="reorderData" id="reorderData"/>-->
+                <br>
+                <input type="submit" id="confirmReorder" value="Submit Reordering"  />
+                <div id="status-area"></div>
+                <div id="reorderResponse"></div>
+              {% endif %}
+            </ul>
+          </div>
+ 
+          <div class="col-md-5 col-md-offset-1">
+            <div class="row manage">
+            <h3> Manage </h3>
+              <div class="col-md-6">
+                {% if queue.closed %}
+                <p> This queue is closed </p>
+                {% else %}
+                <p> This queue is open </p>
+                {% endif %}
+                
+                {% if myqueue %}
+                <form method="post" id="open_close" action="/profile/{{ username }}/{{ uid }}/">
+                  {% csrf_token %}
+                  {% if queue.closed %}
+                  <input type="submit" name="openClose" value="Open Queue">
+                  {% else %}
+                  <input type="submit" name="openClose" value="Close Queue">
+                  {% endif %}
+                </form>
+                <form method="post" id="destroy_queue" action="/profile/{{ username }}/{{ uid }}/">
+                  {% csrf_token %}
+                  <input type="submit" name="destroy" value="Destroy Queue">
+                </form>
+                {% endif %}
+
+                {% if not myqueue %}
+                {% if fav %}
+                <form method="post" id="remove_favorite" action="/profile/{{ username }}/{{ uid }}/">
+                  {% csrf_token %}
+                  <input type="submit" name="removeFavorite" value="Remove from Favorites"/>
+                </form>
+                {% else %}
+                <form method="post" id="add_favorite" action="/profile/{{ username }}/{{ uid }}/">
+                  {% csrf_token %}
+                  <input type="submit" name="addFavorite" value="Add to Favorites"/>
+                </form>
+                {% endif %}
+                {% endif %}
+                
+                {% if not contains and not myqueue and not queue.closed %}
+                <form id="add_to_queue_form" method="post" action="/profile/{{ username }}/{{ uid }}/">
+                  {% csrf_token %}
+                  <input type="submit" name="addMyself" value="Add myself to this queue"/>
+                </form>
+                {% endif %}
+              </div>
+
+              <div class="col-md-6">
+                <p>   Owners </p>
+                <ul>
+                  {% for owner in owners %}
+                  <li>
+                    {{ owner.user.username }}
+                  </li>
+                  {% endfor %}
+                </ul>
+                {% if myqueue %}
+                
+                <form method="post" id="add_owner" action="/profile/{{ username }}/{{ uid }}/">
+                  {% csrf_token %}
+                  <input type="text" placeholder="username" name="newowner"/>
+                  <input type="submit" name="addOwner" value="Add another owner">
+                </form>
+                {% endif %}
+              </div>
+            </div> 
+              
+          </div>
+        </div>
+        
+        
+        {% if myqueue %}
+        <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js">
+        </script>
+        <script type="text/javascript" src="http://farhadi.ir/projects/html5sortable/jquery.sortable.js">
+        </script>
+        <script>
+          (function($) {
+            $.fn.flash_message = function(options) {
+              
               options = $.extend({
-                  text: 'Done',
-                  time: 1000,
+                text: 'Done',
+                time: 1000,
                   how: 'before',
                   class_name: ''
-              }, options);
-
-              return $(this).each(function() {
+                }
+                                   , options);
+                
+                return $(this).each(function() {
                   if( $(this).parent().find('.flash_message').get(0) )
-                  return;
-
+                    return;
+                  
                   var message = $('<span />', {
-                      'class': 'flash_message ' + options.class_name,
-                      text: options.text
-                  }).hide().fadeIn('fast');
-
+                    'class': 'flash_message ' + options.class_name,
+                    text: options.text
+                  }
+                                 ).hide().fadeIn('fast');
+                  
                   $(this)[options.how](message);
-
+                  
                   message.delay(options.time).fadeOut('normal', function() {
-                      $(this).remove();
-                  });
-
-              });
-          };
-      })(jQuery);
-  </script>
-  <script>
-    $(function() {
-      $.ajaxSetup({ 
-        beforeSend: function(xhr, settings) {
-          function getCookie(name) {
-            var cookieValue = null;
-            if (document.cookie && document.cookie != '') {
-              var cookies = document.cookie.split(';');
-              for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                  break;
+                    $(this).remove();
+                  }
+                                                     );
+                  
+                }
+                                   );
+              }
+                ;
+            }
+            )(jQuery);
+        </script>
+        <script>
+          $(function() {
+            $.ajaxSetup({
+              
+              beforeSend: function(xhr, settings) {
+                function getCookie(name) {
+                  var cookieValue = null;
+                  if (document.cookie && document.cookie != '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                      var cookie = jQuery.trim(cookies[i]);
+                      // Does this cookie string begin with the name we want?
+                      if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                      }
+                    }
+                  }
+                  return cookieValue;
+                }
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                  // Only send the token to relative URLs i.e. locally.
+                  xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
                 }
               }
+              
             }
-            return cookieValue;
+                       );
+            
+            $('#sortable1').sortable();
+            
+            $('#confirmReorder').click(function() {
+              
+              datas = new Array();
+              var i = 0;
+              
+              $('#sortable1 li').each(function() {
+                datas[i] = $(this).attr('user');
+                i++;
+              }
+                                     );
+              
+              $.ajax({
+                type: "POST",
+                url: "/profile/{{ username }}/{{ uid }}/",
+                data : {
+                  
+                  name: "reorderQueue", 
+                  csrfmiddlewaretoken: '{{ csrf_token }}',
+                  arr : datas,
+                  success: function(json) {
+                    $('#status-area').flash_message({
+                      text: 'Reorder successful!',
+                      how: 'append'
+                    }
+                                                   );
+                  }
+                  ,
+                }
+                ,
+              }
+                    );
+            }
+                                      );
           }
-          if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-            // Only send the token to relative URLs i.e. locally.
-            xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-          }
-        } 
-      });
+           )(jQuery);
+        </script>
+        {% endif %}
 
-      $('#sortable1').sortable();
-     
-      $('#confirmReorder').click(function() {
-
-        datas = new Array();
-        var i = 0;
-        
-        $('#sortable1 li').each(function() {
-          datas[i] = $(this).attr('user');
-          i++;
-        });
-        
-        $.ajax({
-          type: "POST",
-          url: "/profile/{{ username }}/{{ uid }}/",
-          data : { 
-            name: "reorderQueue", 
-            csrfmiddlewaretoken: '{{ csrf_token }}',
-            arr : datas,
-            success: function(json) {
-                $('#status-area').flash_message({
-                    text: 'Reorder successful!',
-                    how: 'append'
-                });
-            },
-          },
-        });
-      });
-    })(jQuery);
-  </script>
-{% endif %}
-        </div>
-    </body>
+    
+  </body>
 </html>
