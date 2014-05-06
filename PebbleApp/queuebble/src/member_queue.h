@@ -13,4 +13,5 @@ void mqueue_show(int id);
 void mqueue_add(char*, int, int, int);
 void mqueue_reset();
 int get_mid();
+void set_mid(int);
 Layer* getMQueueWindowLayer();

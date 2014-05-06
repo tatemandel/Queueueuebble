@@ -158,3 +158,7 @@ void mqueue_reset() {
 int get_mid() {
   return mid;
 }
+
+void set_mid(int id) {
+  mid = id;
+}

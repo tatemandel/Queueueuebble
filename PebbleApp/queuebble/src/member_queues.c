@@ -82,6 +82,7 @@ static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index,
   mqueue q = mqueues[i];
   //layer_remove_from_parent(menu_layer_get_layer(menu_layer));
   mqueue_reset();
+  set_mid(q.id);
   load_queue(q.id, "mqueue");
 }
 

@@ -141,6 +141,7 @@ void aqueue_add(char *username, int id, int pos, int status) {
   amember m;
   strcpy(m.username, username);
   m.id = id;
+  aid = m.id;
   m.pos = pos;
   m.status = status;
   mem[pos] = m;
@@ -153,4 +154,8 @@ void aqueue_reset() {
 
 int get_aid() {
   return aid;
+}
+
+void set_aid(int id) {
+  aid = id;
 }
