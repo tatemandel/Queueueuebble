@@ -66,6 +66,7 @@ function getOwned(username) {
       if (ob.length == 0) {
         d = {};
 	d["10"] = 1;
+        d["12"] = 0;
         data.push(d);  
       }
       ob.forEach(function(e) { 
@@ -103,6 +104,7 @@ function getUpdatedOwned(username) {
       if (ob.length == 0) {
         d = {};
 	d["10"] = 1;
+        d["12"] = 1;
         data.push(d);  
       }
       ob.forEach(function(e) { 
@@ -140,6 +142,7 @@ function getMember(username) {
       if (ob.length == 0) {
         d = {};
 	d["10"] = 2;
+        d["12"] = 0;
         data.push(d);  
       }
       ob.forEach(function(e) { 
@@ -178,6 +181,7 @@ function getUpdatedMember(username) {
       if (ob.length == 0) {
         d = {};
 	d["10"] = 2;
+        d["12"] = 1;
         data.push(d);  
       }
       ob.forEach(function(e) { 
@@ -217,6 +221,7 @@ function getQueue(id, type) {
         d = {};
 	d["10"] = 3;
 	d["9"] = type;
+        d["12"] = 0;
         data.push(d);  
       }
       ob.forEach(function(e) { 
@@ -256,6 +261,7 @@ function getUpdatedQueue(id, type) {
         d = {};
 	d["10"] = 3;
 	d["9"] = type;
+        d["12"] = 1;
         data.push(d);  
       }
       ob.forEach(function(e) { 

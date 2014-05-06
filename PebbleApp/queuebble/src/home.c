@@ -105,13 +105,15 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
       //      layer_remove_from_parent(text_layer_get_layer(text_layer));
       //      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
       if (update == 0) {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "update is 0");
 	mqueues_show();
       }
       else if (update == 1) {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "update is 1");
 	layer_mark_dirty(getMemberWindowLayer());
       }
     }
-  } else if (user_t && id_t && status_t && num_t && pos_t && type_t && update_t) { // users added to a queue
+  } else if (user_t && id_t && status_t && num_t && pos_t && type_t && update_t) { // users added
     received++;
     char user[50];
     strcpy(user, user_t->value->cstring);
@@ -166,15 +168,17 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 	layer_mark_dirty(getMQueueWindowLayer());
       }
     }
-  } else if (no_data_t) {
-    layer_remove_from_parent(text_layer_get_layer(text_layer));
-    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
-    if (no_data_t->value->int32 == 1) { 
-      aqueues_show();
+  } else if (no_data_t && update_t) {
+    if (update_t->value->int32 == 0) {
+      layer_remove_from_parent(text_layer_get_layer(text_layer));
+      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+      if (no_data_t->value->int32 == 1) { 
+        aqueues_show();
+      }
+      else if (no_data_t->value->int32 == 2) {
+        mqueues_show();
+      } 
     }
-    else if (no_data_t->value->int32 == 2) {
-      mqueues_show();
-    } 
   } else if (user_t) {
     strcpy(username, user_t->value->cstring);
     layer_remove_from_parent(text_layer_get_layer(text_layer));
@@ -286,13 +290,13 @@ static void timer_callback(void *data) {
     whichUpdate = 3;
     aqueue_reset();
     int a = get_aid();
-    load_queue(a, "aqueueUpdate");
+    if (a > 0) load_queue(a, "aqueueUpdate");
   }
   else if (whichUpdate == 3) {
     whichUpdate = 0;
     aqueue_reset();
     int m = get_mid();
-    load_queue(m, "mqueueUpdate");
+    if (m > 0) load_queue(m, "mqueueUpdate");
   }
   timer = app_timer_register(TIME_INTERVAL, timer_callback, NULL);
 }

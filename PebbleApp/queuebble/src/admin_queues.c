@@ -37,7 +37,7 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer,
   int i = cell_index->row;
   if (i < 0) return;
   char sub[20];
-  mini_snprintf(sub, 19, "Size: %d <%s>", aqueues[i].size, aqueues[i].status ? "OPEN" : "CLOSED");
+  mini_snprintf(sub, 19, "Size: %d <%s>", aqueues[i].size, aqueues[i].status ? "CLOSED" : "OPEN");
   menu_cell_basic_draw(ctx, cell_layer, aqueues[i].name, sub, NULL);
 }
 
