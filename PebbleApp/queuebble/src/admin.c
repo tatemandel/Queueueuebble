@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include "home.h"
 #include "admin.h"
 
 #define NUM_MENU_ITEMS 5
