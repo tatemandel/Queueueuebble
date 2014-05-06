@@ -200,7 +200,7 @@ void update_status(char *uname, int id, int status) {
   dict_write_cstring(iter, 1, type);
   Tuplet value = TupletInteger(2, id);
   dict_write_tuplet(iter, &value);
-  dict_write_cstring(iter, 3, username);
+  dict_write_cstring(iter, 3, uname);
   dict_write_end(iter);
   app_message_outbox_send();
 }
