@@ -1,6 +1,7 @@
 #include <pebble.h>
 #include "member_queue.h"
 #include "member.h"
+#include "mini-printf.h"
 
 // should eventually be parametrized by the num of members in the queue
 #define NUM_MENU_ITEMS 1
@@ -8,25 +9,30 @@
 
 static Window *window;
 static MenuLayer *menu_layer;
+static TextLayer *text_layer;
 
 // For functions below eventually cell_index-> row should index 
 // into an an array of members and this would be dependent on the
 // queue at that index
 
+mmember mmem[20];
+int msize = 0;
+
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
 				   MenuIndex *cell_index, void *data) {
-  switch (cell_index->row) {
-  case 0:
-    menu_cell_basic_draw(ctx, cell_layer, "Member 0", NULL, NULL);
-    break;
-  }
+  int i = cell_index->row;
+  if (i < 0) return;
+  mmember a = mmem[i];
+  char sub[20];
+  mini_snprintf(sub, 19, "Position: %d", a.pos);
+  menu_cell_basic_draw(ctx, cell_layer, a.username, sub, NULL);
 }
 
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, 
 					   uint16_t section_index, void *data) {
   switch (section_index) {
   case 0:
-    return NUM_MENU_ITEMS;
+    return msize;
   default:
     return 0;
   }
@@ -56,11 +62,9 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, 
 			  void *data) {
-  switch (cell_index->row) {
-  case 0:
-    member_show();
-    break;
-  }
+  int i = cell_index->row;
+  if (i < 0) return;
+  member_show(mmem[i]);
 }
 
 static void window_load(Window *window) {
@@ -78,13 +82,34 @@ static void window_load(Window *window) {
     .select_click = menu_select_callback, 
   });
 
-  menu_layer_set_click_config_onto_window(menu_layer, window);
+  text_layer = text_layer_create(bounds);
+  text_layer_set_text(text_layer, "There are no members in your queue. Encourage users to join your queue.");
 
-  layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  if (msize > 0) {
+    menu_layer_set_click_config_onto_window(menu_layer, window);
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  }
+  else {
+    window_set_click_config_provider(window, NULL);
+    layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  }
 }
 
 static void window_unload(Window *window) {
   menu_layer_destroy(menu_layer);
+}
+
+static void window_appear(Window *window) {
+  Layer *window_layer = window_get_root_layer(window);
+  layer_remove_child_layers(window_layer);
+  if (msize > 0) {
+    menu_layer_set_click_config_onto_window(menu_layer, window);
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  }
+  else {
+    window_set_click_config_provider(window, NULL);
+    layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  }
 }
 
 void mqueue_init(void) {
@@ -92,6 +117,7 @@ void mqueue_init(void) {
   window_set_window_handlers(window, (WindowHandlers) {
     .load = window_load,
     .unload = window_unload,
+    .appear = window_appear,
   });
 }
 
@@ -102,4 +128,18 @@ void mqueue_deinit(void) {
 void mqueue_show(void) {
   const bool animated = true;
   window_stack_push(window, animated);
+}
+
+void mqueue_add(char *username, int id, int pos, int status) {
+  mmember m;
+  strcpy(m.username, username);
+  m.id = id;
+  m.pos = pos;
+  m.status = status;
+  mmem[pos] = m;
+  if (pos + 1 > msize) msize = pos + 1;
+}
+
+void mqueue_reset() {
+  msize = 0;
 }

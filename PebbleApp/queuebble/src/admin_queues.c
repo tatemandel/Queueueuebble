@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include "home.h"
 #include "admin_queues.h"
 #include "admin_queue.h"
 #include "mini-printf.h"
@@ -18,6 +19,7 @@ typedef struct aqueue {
 
 static Window *window;
 static MenuLayer *menu_layer;
+static TextLayer *text_layer;
 
 aqueue aqueues[20];
 int aindex = 0;
@@ -68,11 +70,12 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer,
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, 
 			  void *data) {
-  switch (cell_index->row) {
-  case 0:
-    aqueue_show(); // right now only a stub but we should have this take in a queue struct
-    break;
-  }
+  int i = cell_index->row;
+  if (i > aindex) return;
+  aqueue q = aqueues[i];
+  //layer_remove_from_parent(menu_layer_get_layer(menu_layer));
+  aqueue_reset();
+  load_queue(q.id, "aqueue");
 }
 
 static void window_load(Window *window) {
@@ -92,11 +95,30 @@ static void window_load(Window *window) {
 
   menu_layer_set_click_config_onto_window(menu_layer, window);
 
-  layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  text_layer = text_layer_create(bounds);
+  text_layer_set_text(text_layer, "You have no Queues add. Go to our webapp to add some.");
+
+  if (aindex > 0) {
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  }
+  else {
+    layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  }
 }
 
 static void window_unload(Window *window) {
   menu_layer_destroy(menu_layer);
+}
+
+static void window_appear(Window *window) {
+  Layer *window_layer = window_get_root_layer(window);
+  layer_remove_child_layers(window_layer);
+  if (aindex > 0) {
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  }
+  else {
+    layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  }
 }
 
 void aqueues_init(void) {
@@ -104,6 +126,7 @@ void aqueues_init(void) {
   window_set_window_handlers(window, (WindowHandlers) {
     .load = window_load,
     .unload = window_unload,
+    .appear = window_appear,
   });
 }
 

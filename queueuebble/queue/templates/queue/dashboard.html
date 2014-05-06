@@ -36,7 +36,7 @@
             {% endif %}
 
             <div class="row">
-            <div class="col-md-5">
+            <div class="col-md-4">
                 <h2>Queues Owned</h2>
                 <ul>
                 {% for q in owned %}
@@ -64,13 +64,23 @@
             </ul>
         </div>
 
-        <div class="col-md-5">
+        <div class="col-md-4">
             <h2>Queues In</h2>
             {% for q in qin %}
                 <a href="/profile/{{ q.creator.user.username }}/{{ q.id }}/">{{ q.name }}</a><br/>
             {% endfor %}
         </div>
+
+        <div class="col-md-4">
+            <h2>Favorites</h2>
+            {% for fav in favorites %}
+            <a href="/profile/{{ fav.creator.user.username }}/{{ fav.id }}/">{{ fav.name }}</a><br>
+            {% endfor %}
+            {% if not favorites %}
+            <p>You have no favorites</p>
+            {% endif %}
         </div>
+    </div>
     </div>  <!-- main -->
         
 </div>

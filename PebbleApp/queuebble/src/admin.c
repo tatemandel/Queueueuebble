@@ -9,6 +9,8 @@
 static Window *window;
 static MenuLayer *menu_layer;
 
+amember curr_amem;
+
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
 				   MenuIndex *cell_index, void *data) {
   switch (cell_index->row) {
@@ -119,7 +121,8 @@ void admin_deinit(void) {
   window_destroy(window);
 }
 
-void admin_show(void) {
+void admin_show(amember a) {
+  curr_amem = a;
   const bool animated = true;
   window_stack_push(window, animated);
 }

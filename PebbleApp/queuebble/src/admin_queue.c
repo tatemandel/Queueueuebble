@@ -1,6 +1,7 @@
 #include <pebble.h>
 #include "admin_queue.h"
 #include "admin.h"
+#include "mini-printf.h"
 
 #define NUM_MENU_ITEMS 1
 #define NUM_MENU_SECTIONS 1
@@ -9,11 +10,10 @@
 
 static Window *window;
 static MenuLayer *menu_layer;
+static TextLayer *text_layer;
 
-enum {
-  BLANK,
-  INIT_RESPONSE,
-};
+amember mem[20];
+int asize = 0;
 
 // For functions below eventually cell_index-> row should index 
 // into an an array of members and this would be dependent on the
@@ -21,11 +21,12 @@ enum {
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
 				   MenuIndex *cell_index, void *data) {
-  switch (cell_index->row) {
-  case 0:
-    menu_cell_basic_draw(ctx, cell_layer, "Member 0", NULL, NULL);
-    break;
-  }
+  int i = cell_index->row;
+  if (i < 0) return;
+  amember a = mem[i];
+  char sub[20];
+  mini_snprintf(sub, 19, "Position: %d", a.pos);
+  menu_cell_basic_draw(ctx, cell_layer, a.username, sub, NULL);
 }
 
 // Here we draw what each header is                                    
@@ -54,18 +55,16 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer,
 					   uint16_t section_index, void *data) {
   switch (section_index) {
   case 0:
-    return NUM_MENU_ITEMS;
+    return asize;
   default:
     return 0;
   }
 }
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
-  switch (cell_index->row) {
-  case 0:
-    admin_show(); //should take in a member
-    break;
-  }
+  int i = cell_index->row;
+  if (i < 0) return;
+  admin_show(mem[i]);
 }
 
 static void window_load(Window *window) {
@@ -83,13 +82,34 @@ static void window_load(Window *window) {
     .select_click = menu_select_callback, 
   });
 
-  menu_layer_set_click_config_onto_window(menu_layer, window);
+  text_layer = text_layer_create(bounds);
+  text_layer_set_text(text_layer, "There are no members in your queue. Encourage users to join your queue.");
 
-  layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  if (asize > 0) {
+    menu_layer_set_click_config_onto_window(menu_layer, window);
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  }
+  else {
+    window_set_click_config_provider(window, NULL);
+    layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  }
 }
 
 static void window_unload(Window *window) {
   menu_layer_destroy(menu_layer);
+}
+
+static void window_appear(Window *window) {
+  Layer *window_layer = window_get_root_layer(window);
+  layer_remove_child_layers(window_layer);
+  if (asize > 0) {
+    menu_layer_set_click_config_onto_window(menu_layer, window);
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  }
+  else {
+    window_set_click_config_provider(window, NULL);
+    layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  }
 }
 
 void aqueue_init(void) {
@@ -97,6 +117,7 @@ void aqueue_init(void) {
   window_set_window_handlers(window, (WindowHandlers) {
     .load = window_load,
     .unload = window_unload,
+    .appear = window_appear,
   });
 }
 
@@ -107,4 +128,18 @@ void aqueue_deinit(void) {
 void aqueue_show(void) {
   const bool animated = true;
   window_stack_push(window, animated);
+}
+
+void aqueue_add(char *username, int id, int pos, int status) {
+  amember m;
+  strcpy(m.username, username);
+  m.id = id;
+  m.pos = pos;
+  m.status = status;
+  mem[pos] = m;
+  if (pos + 1 > asize) asize = pos + 1;
+}
+
+void aqueue_reset() {
+  asize = 0;
 }

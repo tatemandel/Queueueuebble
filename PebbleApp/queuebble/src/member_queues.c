@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include "home.h"
 #include "member_queues.h"
 #include "member_queue.h"
 #include "mini-printf.h"
@@ -15,9 +16,9 @@ typedef struct mqueue {
   int status;
 } mqueue;
 
-
 static Window *window;
 static MenuLayer *menu_layer;
+static TextLayer *text_layer;
 
 mqueue mqueues[20];
 int mindex = 0;
@@ -71,11 +72,12 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, 
 			  void *data) {
-  switch (cell_index->row) {
-  case 0:
-    mqueue_show(); // right now only a stub but we should have this take in a queue struct
-    break;
-  }
+  int i = cell_index->row;
+  if (i > mindex) return;
+  mqueue q = mqueues[i];
+  //layer_remove_from_parent(menu_layer_get_layer(menu_layer));
+  mqueue_reset();
+  load_queue(q.id, "mqueue");
 }
 
 static void window_load(Window *window) {
@@ -95,11 +97,30 @@ static void window_load(Window *window) {
 
   menu_layer_set_click_config_onto_window(menu_layer, window);
 
-  layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  text_layer = text_layer_create(bounds);
+  text_layer_set_text(text_layer, "You are in no Queues. Go to our webapp to add yourself to some.");
+
+  if (mindex > 0) {
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  }
+  else {
+    layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  }
 }
 
 static void window_unload(Window *window) {
   menu_layer_destroy(menu_layer);
+}
+
+static void window_appear(Window *window) {
+  Layer *window_layer = window_get_root_layer(window);
+  layer_remove_child_layers(window_layer);
+  if (mindex > 0) {
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  }
+  else {
+    layer_add_child(window_layer, text_layer_get_layer(text_layer));
+  }
 }
 
 void mqueues_init(void) {
@@ -107,6 +128,7 @@ void mqueues_init(void) {
   window_set_window_handlers(window, (WindowHandlers) {
     .load = window_load,
     .unload = window_unload,
+    .appear = window_appear,
   });
 }
 
