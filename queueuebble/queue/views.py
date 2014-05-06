@@ -193,8 +193,8 @@ def profile_id(request, username, uid):
           if n.position > del_pos:
             n.position = n.position - 1
             if (n.position == 1):
-            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
-            n.save()
+              send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email],  fail_silently=False)
+              n.save()
       contains = False
     if 'removeFromMyQueue' in request.POST:
       uRemoveName = request.POST.get('nodeToRemove2')
@@ -459,8 +459,11 @@ def pebble_get_admin(request):
 @csrf_exempt
 def pebble_get_member(request):
   if request.method == 'POST':
+    print "dslkfj"
     username = request.POST['username']
+    print "here"
     user = User.objects.get(username=username)
+    print user
     if user is not None:
       puser = UserProfile.objects.get(user=user)
       data = []
@@ -501,9 +504,6 @@ def pebble_update_status(request):
     qid = request.POST['id']
     username = request.POST['username']
     typ = request.POST['type']
-    print typ
-    print username
-    print qid
     user = User.objects.get(username=username)
     puser = UserProfile.objects.get(user=user)
     queue = Queue.objects.get(id=qid)
@@ -511,7 +511,6 @@ def pebble_update_status(request):
     qnodes = list(Nodes.object.filter(queue))
     qnodes.sort(key=lambda x: x.position)
     node = nodes[0]
-    print node
     if typ == "nstart":
       node.changeStatus("Not started")
       node.save()
@@ -526,10 +525,8 @@ def pebble_update_status(request):
       nodes = list(Node.objects.filter(queue=queue))
       for n in nodes:
         if n.position > del_pos:
-          print n.user.user.username
-          print n.position
           n.position = n.position - 1
-          if (n.position == 1):
+          if n.position == 1:
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
           n.save()
     elif typ == "up":
@@ -537,24 +534,24 @@ def pebble_update_status(request):
         node2 = Node.objects.get(queue=queue, position = node.position - 1)
         node2.position = node.position
         node2.save()
-        if (node.position == 1):
+        if node.position == 1:
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
         # update other
         node.position = node.position - 1;
         node.save()
-        if (node.position == 1):
+        if node.position == 1:
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
     elif typ == "down":
       if not node.position == queue.size - 1:
         node2 = Node.objects.get(queue=queue, position = node.position + 1)
         node2.position = node.position
         node2.save()
-        if (node2.position == 1):
+        if node2.position == 1:
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node2.user.user.email], fail_silently=False)
         # update other
         node.position = node.position + 1;
         node.save()
-        if (node.position == 1):
+        if node.position == 1:
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node.user.user.email], fail_silently=False)
     elif typ == "favorite":
       puser.favorites.add(queue)
