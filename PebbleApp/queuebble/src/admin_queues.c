@@ -27,6 +27,10 @@ int aindex = 0;
 // For functions below eventually cell_index-> row should index 
 // into an an array of queues and this would be dependent on the
 // queue at that index
+Layer *getAdminWindowLayer() {
+  Layer *window_layer = window_get_root_layer(window);
+  return window_layer;
+}
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
 				   MenuIndex *cell_index, void *data) {

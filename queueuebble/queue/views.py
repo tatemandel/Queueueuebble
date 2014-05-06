@@ -141,7 +141,7 @@ def confirm_reorder(request, queue):
     no = nodes.get(user=up_object)
     no.position = i
     if (no.position == 1):
-            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
+      send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [no.user.user.email], fail_silently=False)
     no.save()
     i = i + 1
 
@@ -459,9 +459,7 @@ def pebble_get_admin(request):
 @csrf_exempt
 def pebble_get_member(request):
   if request.method == 'POST':
-    print "dslkfj"
     username = request.POST['username']
-    print "here"
     user = User.objects.get(username=username)
     print user
     if user is not None:
@@ -531,40 +529,42 @@ def pebble_update_status(request):
           n.save()
     elif typ == "up":
       if not node.position == 0:
-        node2 = Node.objects.get(queue=queue, position = node.position - 1)
+        node2 = Node.objects.get(queue=queue, position=node.position-1)
         node2.position = node.position
         node2.save()
         if node.position == 1:
-            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
+          send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node2.user.user.email], fail_silently=False)
         # update other
-        node.position = node.position - 1;
+        node.position = node.position - 1
         node.save()
         if node.position == 1:
-            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
+          send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node.user.user.email], fail_silently=False)
     elif typ == "down":
       if not node.position == queue.size - 1:
-        node2 = Node.objects.get(queue=queue, position = node.position + 1)
+        node2 = Node.objects.get(queue=queue, position=node.position+1)
         node2.position = node.position
         node2.save()
         if node2.position == 1:
-            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node2.user.user.email], fail_silently=False)
+          send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node2.user.user.email], fail_silently=False)
         # update other
-        node.position = node.position + 1;
+        node.position = node.position + 1
         node.save()
         if node.position == 1:
-            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node.user.user.email], fail_silently=False)
+          send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node.user.user.email], fail_silently=False)
     elif typ == "favorite":
       print "favorites"
       puser.favorites.add(queue)
       puser.save()
           
     data = []
-    # for n in nodes:
-    #   d = { 'username' : n.user.user.username,
-    #         'id' : n.queue.id,
-    #         'position' : n.position,
-    #         'status' : n.status }
-    #   data.append(d)
+    if typ == "remove" or typ == "up" or typ == "down":
+      nodes = Node.objects.filter(queue=queue)
+      for n in nodes:
+        d = { 'username' : n.user.user.username,
+              'id' : n.queue.id,
+              'position' : n.position,
+              'status' : n.status }
+        data.append(d)
     return HttpResponse(json.dumps(data), content_type="application/json")
   else:
     return HttpResponse("Nothing to get", status=400)

@@ -8,6 +8,10 @@
 // visible to the user
 #define NUM_MENU_SECTIONS 1
 
+static Window *window;
+static MenuLayer *menu_layer;
+static TextLayer *text_layer;
+
 typedef struct mqueue {
   char name[32];
   char creator[32];
@@ -16,16 +20,17 @@ typedef struct mqueue {
   int status;
 } mqueue;
 
-static Window *window;
-static MenuLayer *menu_layer;
-static TextLayer *text_layer;
-
 mqueue mqueues[20];
 int mindex = 0;
 
 // For functions below eventually cell_index-> row should index 
 // into an an array of queues and this would be dependent on the
 // queue at that index
+
+Layer *getMemberWindowLayer() {
+  Layer *window_layer = window_get_root_layer(window);
+  return window_layer;
+}
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
 				   MenuIndex *cell_index, void *data) {

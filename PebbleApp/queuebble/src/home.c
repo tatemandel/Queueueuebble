@@ -7,7 +7,7 @@
 
 #define NUM_MENU_ITEMS 2
 #define NUM_MENU_SECTIONS 1
-
+#define TIME_INTERVAL 10000
 #define USERNAME_KEY 1
 
 static Window *window;
@@ -15,10 +15,12 @@ static Window *window;
 static Layer *window_layer;
 static MenuLayer *menu_layer;
 static TextLayer *text_layer;
+static AppTimer *timer;
 
 static char username[50];
 
 int received = 0;
+int whichUpdate = 0;
 
 enum {
   BLANK, // 0
@@ -32,7 +34,8 @@ enum {
   POSITION_KEY, // 8
   TYPE_KEY, // 9
   NO_DATA_KEY, // 10
-  SHOW_KEY, // 11
+  SHOW_KEY, //11
+  UPDATE_KEY, // 12
 };
 
 void out_sent_handler(DictionaryIterator *sent, void *context) {
@@ -59,8 +62,9 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
   Tuple *type_t = dict_find(iter, TYPE_KEY);
   Tuple *no_data_t = dict_find(iter, NO_DATA_KEY);
   Tuple *show_t = dict_find(iter, SHOW_KEY);
+  Tuple *update_t = dict_find(iter, UPDATE_KEY);
 
-  if (id_t && name_t && size_t && status_t && num_t) { // admin queues
+  if (id_t && name_t && size_t && status_t && num_t && update_t) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "received one admin");
     received++;
     char name[50];
@@ -69,12 +73,21 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     int size = size_t->value->int32;
     int status = status_t->value->uint8;
     int num = num_t->value->int32;
+    int update = update_t->value->int32;
     aqueues_add(size, id, name, status);
     if (received == num) {
       received = 0;
-      aqueues_show();
+      //      layer_remove_from_parent(text_layer_get_layer(text_layer));
+      //      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));  
+      if (update == 0) {
+	aqueues_show();
+      }
+      else if (update == 1) {
+	layer_mark_dirty(getAdminWindowLayer());
+      }
     }
-  } else if (id_t && name_t && status_t && num_t && creator_t && pos_t) { // member queues
+  }
+  else if (id_t && name_t && status_t && num_t && creator_t && pos_t && update_t) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "received one member");
     received++;
     char name[50];
@@ -85,10 +98,18 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     int status = status_t->value->uint8;
     int num = num_t->value->int32;
     int pos = pos_t->value->int32;
+    int update = update_t->value->int32;
     mqueues_add(name, creator, pos, id, status);
     if (received == num) {
       received = 0;
-      mqueues_show();
+      //      layer_remove_from_parent(text_layer_get_layer(text_layer));
+      //      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+      if (update == 0) {
+	mqueues_show();
+      }
+      else if (update == 1) {
+	layer_mark_dirty(getMemberWindowLayer());
+      }
     }
   } else if (user_t && id_t && status_t && num_t && pos_t && type_t) { // users added to a queue
     received++;
@@ -104,6 +125,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
       APP_LOG(APP_LOG_LEVEL_DEBUG, "adding a user");
       aqueue_add(user, id, pos, status);
     } else if (type == 2) {
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "mqueue add");
       mqueue_add(user, id, pos, status);
     }
     if (received == num) {
@@ -233,6 +255,21 @@ void send_messages(char *type) {
   app_message_outbox_send();
 }
 
+static void timer_callback(void *data) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "tick");
+  if (whichUpdate == 0) {
+    whichUpdate = 1;
+    mqueues_reset();
+    send_messages("memberUpdate");
+  }
+  else if (whichUpdate == 1) {
+    whichUpdate = 0;
+    aqueues_reset();
+    send_messages("adminUpdate");
+  }
+  timer = app_timer_register(TIME_INTERVAL, timer_callback, NULL);
+}
+
 void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, 
 			  void *data) {
   switch (cell_index->row) {
@@ -272,6 +309,8 @@ static void window_load(Window *window) {
     menu_layer_set_click_config_onto_window(menu_layer, window);
     layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
   }
+
+  timer = app_timer_register(TIME_INTERVAL, timer_callback, NULL);
 }
 
 static void window_unload(Window *window) {
