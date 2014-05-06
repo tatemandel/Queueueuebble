@@ -71,7 +71,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     strcpy(name, name_t->value->cstring);
     int id = id_t->value->int32;
     int size = size_t->value->int32;
-    int status = status_t->value->uint8;
+    int status = status_t->value->int32;
     int num = num_t->value->int32;
     int update = update_t->value->int32;
     aqueues_add(size, id, name, status);

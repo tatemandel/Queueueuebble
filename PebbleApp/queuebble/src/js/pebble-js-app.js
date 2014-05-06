@@ -74,7 +74,7 @@ function getOwned(username) {
         d["2"] = e['id'];
         d["3"] = e['name'];
         d["4"] = e['size'];
-        d["5"] = e['status'] == "true" ? 1 : 0;
+        d["5"] = e['status'] ? 1 : 0;
         d["6"] = ob.length;
 	d["12"] = 0;
         data.push(d);
@@ -112,7 +112,7 @@ function getUpdatedOwned(username) {
         d["2"] = e['id'];
         d["3"] = e['name'];
         d["4"] = e['size'];
-        d["5"] = e['status'] == "true" ? 1 : 0;
+        d["5"] = e['status'] ? 1 : 0;
         d["6"] = ob.length;
 	d["12"] = 1;
         data.push(d);
