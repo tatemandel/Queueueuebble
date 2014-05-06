@@ -34,7 +34,8 @@ enum {
   POSITION_KEY, // 8
   TYPE_KEY, // 9
   NO_DATA_KEY, // 10
-  UPDATE_KEY, // 11
+  SHOW_KEY, //11
+  UPDATE_KEY, // 12
 };
 
 void out_sent_handler(DictionaryIterator *sent, void *context) {
@@ -60,14 +61,9 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
   Tuple *pos_t = dict_find(iter, POSITION_KEY);
   Tuple *type_t = dict_find(iter, TYPE_KEY);
   Tuple *no_data_t = dict_find(iter, NO_DATA_KEY);
+  Tuple *show_t = dict_find(iter, SHOW_KEY);
   Tuple *update_t = dict_find(iter, UPDATE_KEY);
 
-  if (user_t && id_t == NULL && name_t == NULL && size_t == NULL && status_t == NULL) { // etc
-    strcpy(username, user_t->value->cstring);
-    layer_remove_from_parent(text_layer_get_layer(text_layer));
-    menu_layer_set_click_config_onto_window(menu_layer, window);
-    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
-  }
   if (id_t && name_t && size_t && status_t && num_t && update_t) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "received one admin");
     received++;
@@ -91,7 +87,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
       }
     }
   }
-  if (id_t && name_t && status_t && num_t && creator_t && pos_t && update_t) {
+  else if (id_t && name_t && status_t && num_t && creator_t && pos_t && update_t) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "received one member");
     received++;
     char name[50];
@@ -115,9 +111,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 	layer_mark_dirty(getMemberWindowLayer());
       }
     }
- }
- if (user_t && id_t && status_t && num_t && pos_t && type_t) {
-    //    APP_LOG(APP_LOG_LEVEL_DEBUG, "Got queue message");
+  } else if (user_t && id_t && status_t && num_t && pos_t && type_t) { // users added to a queue
     received++;
     char user[50];
     strcpy(user, user_t->value->cstring);
@@ -128,6 +122,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     int type = type_t->value->int32;
     
     if (type == 1) {
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "adding a user");
       aqueue_add(user, id, pos, status);
     } else if (type == 2) {
       APP_LOG(APP_LOG_LEVEL_DEBUG, "mqueue add");
@@ -135,34 +130,34 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     }
     if (received == num) {
       received = 0;
-      //      layer_remove_from_parent(text_layer_get_layer(text_layer));
-      //      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));  
-      if (type == 1) {
+      if (type == 1 && show_t == NULL) {
         aqueue_show();
-      } else if (type == 2) {
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "mqueue gonna show");
+      } else if (type == 2 && show_t == NULL) {
         mqueue_show();
       }
     }
- }
- if (no_data_t && type_t) {
-   if (no_data_t->value->int32 == 3 && type_t->value->int32 == 1) {
-     aqueue_show();
-   }
-   else if (no_data_t->value->int32 == 3 && type_t->value->int32 == 2) {
-     mqueue_show();
-   }
- }
- if (no_data_t) {
-   layer_remove_from_parent(text_layer_get_layer(text_layer));
-   layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
-   if (no_data_t->value->int32 == 1) { 
-     aqueues_show();
-   }
-   else if (no_data_t->value->int32 == 2) {
-     mqueues_show();
-   } 
- }
+  } else if (no_data_t && type_t) {
+    if (no_data_t->value->int32 == 3 && type_t->value->int32 == 1) {
+      aqueue_show();
+    }
+    else if (no_data_t->value->int32 == 3 && type_t->value->int32 == 2) {
+      mqueue_show();
+    }
+  } else if (no_data_t) {
+    layer_remove_from_parent(text_layer_get_layer(text_layer));
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+    if (no_data_t->value->int32 == 1) { 
+      aqueues_show();
+    }
+    else if (no_data_t->value->int32 == 2) {
+      mqueues_show();
+    } 
+  } else if (user_t) {
+    strcpy(username, user_t->value->cstring);
+    layer_remove_from_parent(text_layer_get_layer(text_layer));
+    menu_layer_set_click_config_onto_window(menu_layer, window);
+    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+  }
 }
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
@@ -212,6 +207,9 @@ void update_status(char *uname, int id, int status) {
   char *type = status == 0 ? "nstart" : status == 1 ? "progress" : 
                status == 2 ? "remove" : status == 3 ? "up" : 
                status == 4 ? "down" : "favorite";
+  if (status == 2 || status == 3 || status == 4) {
+    aqueue_reset();
+  }
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);
   dict_write_cstring(iter, 1, type);
