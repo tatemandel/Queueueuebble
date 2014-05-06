@@ -498,4 +498,53 @@ def pebble_get_queue(request):
   else:
     return HttpResponse("Nothing to get", status=400)
 
+@csrf_exempt
+def pebble_update_status(request):
+  if request.method == 'POST':
+    qid = request.POST['id']
+    username = request.POST['username']
+    typ = request.POST['type']
+    user = User.objects.get(username=username)
+    puser = UserProfile.objects.get(user=user)
+    queue = Queue.objects.get(id=qid)
+    node = Node.objects.get(queue=queue, user=puser)
 
+    if typ == "nstart":
+      node.changeStatus("Not started")
+      node.save()
+    elif typ == "progress":
+      node.changeStatus("In progress")
+      node.save()
+    elif typ == "remove":
+      del_pos = node.pos
+      node.delete()
+      queue.size = queue.size - 1
+      queue.save()
+      nodes = list(Node.objects.filter(queue=queue))
+      for n in nodes:
+        if n.position > del_pos:
+          n.position = n.position - 1
+          n.save()
+    elif typ == "up":
+      if not node.position == 0:
+        node2 = Node.objects.get(queue=queue, position = node.position - 1)
+        node2.position = node.position
+        # update other
+        node.position = node.position - 1;
+    elif typ == "down":
+      if not node.position == queue.size - 1:
+        node2 = Node.objects.get(queue=queue, position = node.position + 1)
+        node2.position = node.position
+        # update other
+        node.position = node.position + 1;
+          
+    data = []
+    # for n in nodes:
+    #   d = { 'username' : n.user.user.username,
+    #         'id' : n.queue.id,
+    #         'position' : n.position,
+    #         'status' : n.status }
+    #   data.append(d)
+    return HttpResponse(json.dumps(data), content_type="application/json")
+  else:
+    return HttpResponse("Nothing to get", status=400)

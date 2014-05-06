@@ -172,26 +172,26 @@ function updateStatus(id, username, type) {
   http.onload = function() {
     if (http.status == 200) {
       console.log(http.responseText);
-      var ob = JSON.parse(http.responseText);
-      var data = [];
-      // put in helpers to send valid data to all layers on changes
-      if (ob.length == 0) {
-        d = {};
-	d["10"] = 3;
-	d["9"] = type;
-        data.push(d);  
-      }
-      ob.forEach(function(e) { 
-        d = {};
-        d["1"] = e['username'];
-        d["2"] = e['id'];
-        d["5"] = e['status'];
-        d["6"] = ob.length;
-        d["8"] = e['position'];
-        d["9"] = type;
-        data.push(d);
-      });
-      sendMessages(data);
+      // var ob = JSON.parse(http.responseText);
+      // var data = [];
+      // // put in helpers to send valid data to all layers on changes
+      // if (ob.length == 0) {
+      //   d = {};
+      //   d["10"] = 3;
+      //   d["9"] = type;
+      //   data.push(d);  
+      // }
+      // ob.forEach(function(e) { 
+      //   d = {};
+      //   d["1"] = e['username'];
+      //   d["2"] = e['id'];
+      //   d["5"] = e['status'];
+      //   d["6"] = ob.length;
+      //   d["8"] = e['position'];
+      //   d["9"] = type;
+      //   data.push(d);
+      // });
+      // sendMessages(data);
     } else {
       console.log(http.responseText);
     }
