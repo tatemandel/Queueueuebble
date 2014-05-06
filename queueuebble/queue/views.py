@@ -208,8 +208,9 @@ def profile_id(request, username, uid):
           uRemovePos = uRemoveNode.position
           uRemoveNode.delete();
           queue.size = queue.size - 1
-          if queue.size>0:
-            uNextUser = User.objects.get(username=uRemoveNodes[1])
+          if queue.size > 0:
+            nextUserNode = nodes[uRemovePos + 1]
+            uNextUser = nextUserNode.user.user
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [uNextUser.email], fail_silently=False)
           queue.save();
           nodes = list(Node.objects.filter(queue=queue))
@@ -479,4 +480,3 @@ def pebble_get_member(request):
       return HttpResponse("Invalid username", status=400)
   else:
     return HttpResponse("Nothing to get", status=400)
-
