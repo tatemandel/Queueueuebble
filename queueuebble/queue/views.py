@@ -141,7 +141,7 @@ def confirm_reorder(request, queue):
     no = nodes.get(user=up_object)
     no.position = i
     if (no.position == 1):
-            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
+      send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [no.user.user.email], fail_silently=False)
     no.save()
     i = i + 1
 
