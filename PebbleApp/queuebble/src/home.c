@@ -111,7 +111,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 	layer_mark_dirty(getMemberWindowLayer());
       }
     }
-  } else if (user_t && id_t && status_t && num_t && pos_t && type_t) { // users added to a queue
+  } else if (user_t && id_t && status_t && num_t && pos_t && type_t && update_t) { // users added to a queue
     received++;
     char user[50];
     strcpy(user, user_t->value->cstring);
@@ -120,7 +120,8 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     int num = num_t->value->int32;
     int pos = pos_t->value->int32;
     int type = type_t->value->int32;
-    
+    int update = update_t->value->int32;
+
     if (type == 1) {
       APP_LOG(APP_LOG_LEVEL_DEBUG, "adding a user");
       aqueue_add(user, id, pos, status);
@@ -131,17 +132,37 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     if (received == num) {
       received = 0;
       if (type == 1 && show_t == NULL) {
-        aqueue_show();
+	if (update == 0) {
+	  aqueue_show(id);
+	}
+	else if (update == 1) {
+	  layer_mark_dirty(getAQueueWindowLayer());
+	}
       } else if (type == 2 && show_t == NULL) {
-        mqueue_show();
+	if (update == 0) {
+	  mqueue_show(id);
+	}
+	else if (update == 1) {
+	  layer_mark_dirty(getMQueueWindowLayer());
+	}
       }
     }
-  } else if (no_data_t && type_t) {
+  } else if (no_data_t && type_t && update_t) {
     if (no_data_t->value->int32 == 3 && type_t->value->int32 == 1) {
-      aqueue_show();
+      if (update_t->value->int32 == 0) {
+	  aqueue_show(-1);
+      }
+      else if (update_t->value->int32 == 1) {
+	layer_mark_dirty(getAQueueWindowLayer());
+      }
     }
     else if (no_data_t->value->int32 == 3 && type_t->value->int32 == 2) {
-      mqueue_show();
+      if (update_t->value->int32 == 0) {
+	  mqueue_show(-1);
+      }
+      else if (update_t->value->int32 == 1) {
+	layer_mark_dirty(getMQueueWindowLayer());
+      }
     }
   } else if (no_data_t) {
     layer_remove_from_parent(text_layer_get_layer(text_layer));
@@ -252,9 +273,21 @@ static void timer_callback(void *data) {
     send_messages("memberUpdate");
   }
   else if (whichUpdate == 1) {
-    whichUpdate = 0;
+    whichUpdate = 2;
     aqueues_reset();
     send_messages("adminUpdate");
+  }
+  else if (whichUpdate == 2) {
+    whichUpdate = 3;
+    aqueue_reset();
+    int a = get_aid();
+    load_queue(a, "aqueueUpdate");
+  }
+  else if (whichUpdate == 3) {
+    whichUpdate = 0;
+    aqueue_reset();
+    int m = get_mid();
+    load_queue(m, "mqueueUpdate");
   }
   timer = app_timer_register(TIME_INTERVAL, timer_callback, NULL);
 }

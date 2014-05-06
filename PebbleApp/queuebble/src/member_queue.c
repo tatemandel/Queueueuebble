@@ -18,6 +18,12 @@ static TextLayer *text_layer;
 
 mmember mmem[20];
 int msize = 0;
+int mid = 0;
+
+Layer *getMQueueWindowLayer() {
+  Layer *window_layer = window_get_root_layer(window);
+  return window_layer;
+}
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
 				   MenuIndex *cell_index, void *data) {
@@ -129,7 +135,8 @@ void mqueue_deinit(void) {
   window_destroy(window);
 }
 
-void mqueue_show(void) {
+void mqueue_show(int id) {
+  mid = id;
   const bool animated = true;
   window_stack_push(window, animated);
 }
@@ -146,4 +153,8 @@ void mqueue_add(char *username, int id, int pos, int status) {
 
 void mqueue_reset() {
   msize = 0;
+}
+
+int get_mid() {
+  return mid;
 }

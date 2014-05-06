@@ -9,6 +9,8 @@ typedef struct mmember {
 
 void mqueue_init(void);
 void mqueue_deinit(void);
-void mqueue_show(void);
+void mqueue_show(int id);
 void mqueue_add(char*, int, int, int);
 void mqueue_reset();
+int get_mid();
+Layer* getMQueueWindowLayer();
