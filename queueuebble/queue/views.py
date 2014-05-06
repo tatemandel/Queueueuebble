@@ -480,3 +480,23 @@ def pebble_get_member(request):
       return HttpResponse("Invalid username", status=400)
   else:
     return HttpResponse("Nothing to get", status=400)
+
+
+@csrf_exempt
+def pebble_get_queue(request):
+  if request.method == 'POST':
+    qid = request.POST['id']
+    queue = Queue.objects.get(id=qid)
+    nodes = Node.objects.filter(queue=queue)
+    data = []
+    for n in nodes:
+      d = { 'username' : n.user.user.username,
+            'id' : n.queue.id,
+            'position' : n.position,
+            'status' : n.status }
+      data.append(d)
+    return HttpResponse(json.dumps(data), content_type="application/json")
+  else:
+    return HttpResponse("Nothing to get", status=400)
+
+
