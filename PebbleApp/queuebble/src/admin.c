@@ -69,18 +69,23 @@ static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index,
   switch (cell_index->row) {
   case 0:
     // change status to not started
+    update_status(curr_amem.username, curr_amem.id, 0);
     break;
   case 1:
     // change status to in progress
+    update_status(curr_amem.username, curr_amem.id, 1);
     break;
   case 2:
     // remove from queue
+    update_status(curr_amem.username, curr_amem.id, 2);
     break;
   case 3:
     // move up
+    update_status(curr_amem.username, curr_amem.id, 3);
     break;
   case 4:
     // move down
+    update_status(curr_amem.username, curr_amem.id, 4);
     break;
   }
 }

@@ -192,6 +192,19 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
   return MENU_CELL_BASIC_HEADER_HEIGHT;
 }
 
+void update_status(char *uname, int id, int status) {
+  char *type = status == 0 ? "nstart" : status == 1 ? "progress" : 
+               status == 2 ? "remove" : status == 3 ? "up" : "down";
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  dict_write_cstring(iter, 1, type);
+  Tuplet value = TupletInteger(2, id);
+  dict_write_tuplet(iter, &value);
+  dict_write_cstring(iter, 3, username);
+  dict_write_end(iter);
+  app_message_outbox_send();
+}
+
 void load_queue(int id, char *type) {
   //  text_layer_set_text(text_layer, "Loading...");
   //  layer_add_child(window_layer, text_layer_get_layer(text_layer));
@@ -283,3 +296,6 @@ void home_deinit(void) {
   window_destroy(window);
 }
 
+char* get_username() {
+  return username;
+}

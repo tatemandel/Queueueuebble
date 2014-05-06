@@ -160,17 +160,59 @@ function getQueue(id, type) {
   http.send(params);
 }
 
+function updateStatus(id, username, type) {
+  var http = new XMLHttpRequest();
+  var params = "id=" + id + "&username=" + username + "&type=" + type;
+  http.open("POST", "HTTP://54.84.161.157/pebble_update_status/", true);
+
+  http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  http.setRequestHeader("Content-length", params.length);
+  http.setRequestHeader("Connection", "close");
+
+  http.onload = function() {
+    if (http.status == 200) {
+      console.log(http.responseText);
+      // var ob = JSON.parse(http.responseText);
+      // var data = [];
+      // // put in helpers to send valid data to all layers on changes
+      // if (ob.length == 0) {
+      //   d = {};
+      //   d["10"] = 3;
+      //   d["9"] = type;
+      //   data.push(d);  
+      // }
+      // ob.forEach(function(e) { 
+      //   d = {};
+      //   d["1"] = e['username'];
+      //   d["2"] = e['id'];
+      //   d["5"] = e['status'];
+      //   d["6"] = ob.length;
+      //   d["8"] = e['position'];
+      //   d["9"] = type;
+      //   data.push(d);
+      // });
+      // sendMessages(data);
+    } else {
+      console.log(http.responseText);
+    }
+  }
+  http.send(params);
+}
+
 Pebble.addEventListener("appmessage", function(e) {
   console.log("Received message: " + e.payload[1] + " " + e.payload[2]);
-  if (e.payload[1] == "admin") {
+  var t = e.payload[1];
+  if (t == "admin") {
     getOwned(e.payload[2]);
-  } else if (e.payload[1] == "member") {
+  } else if (t == "member") {
     getMember(e.payload[2]);
-  } else if (e.payload[1] == "mqueue") {
+  } else if (t == "mqueue") {
     // 1 is admin, 2 is member
     getQueue(e.payload[2], 2);
-  } else if (e.payload[1] == "aqueue") {
+  } else if (t == "aqueue") {
     // 1 is admin, 2 is member
     getQueue(e.payload[2], 1);
+  } else if (t == "nstart" || t == "progress" || t == "remove" || t == "up" || t == "down") {
+    updateStatus(e.payload[2], e.payload[3], t);
   }
 });

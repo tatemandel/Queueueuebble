@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include "home.h"
 #include "member_queue.h"
 #include "member.h"
 #include "mini-printf.h"
@@ -64,7 +65,10 @@ static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index,
 			  void *data) {
   int i = cell_index->row;
   if (i < 0) return;
-  member_show(mmem[i]);
+  char *username = get_username();
+  if (strcmp(username, mmem[i].username) == 0) {
+    member_show(mmem[i]);
+  }
 }
 
 static void window_load(Window *window) {
