@@ -49,6 +49,7 @@ urlpatterns = patterns('',
         url(r'^pebble_get_member/$', views.pebble_get_member, name='pebble_member'),
         url(r'^pebble_get_queue/$', views.pebble_get_queue, name='pebble_queue'),
         url(r'^pebble_update_status/$', views.pebble_update_status, name='pebble_update_status'),
+        url(r'^pebble_notify/$', views.pebble_notify, name='pebble_notify'),
         )
 
 urlpatterns += staticfiles_urlpatterns()

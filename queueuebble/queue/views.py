@@ -568,3 +568,17 @@ def pebble_update_status(request):
     return HttpResponse(json.dumps(data), content_type="application/json")
   else:
     return HttpResponse("Nothing to get", status=400)
+
+@csrf_exempt
+def pebble_notify(request):
+  if request.method == 'POST':
+    username = request.POST['username']
+    user = User.objects.get(username=username)
+    puser = UserProfile.objects.get(user=user)
+    data = []
+    for n in Node.objects.filter(user=puser):
+      data.append({ n.queue.id : n.position })
+
+    return HttpResponse(json.dumps(data), content_type="application/json")
+  else:
+    return HttpResponse("Nothing to get", status=400)
