@@ -145,6 +145,8 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
         if (show_t == NULL && update == 0) {
 	  mqueue_show(id);
         } else if (show_t) {
+          mqueues_clean(id);
+          APP_LOG(APP_LOG_LEVEL_DEBUG, "cleaning members");
           // clean the member page to not have the queue anymore
         } else if (update == 1) {
 	  layer_mark_dirty(getMQueueWindowLayer());

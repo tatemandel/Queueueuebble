@@ -159,3 +159,15 @@ void mqueues_add(char *name, char *creator, int pos, int id, int status) {
 void mqueues_reset() {
   mindex = 0;
 }
+
+void mqueues_clean(int id) {
+  int i = 0;
+  int found = 0;
+  for (i = 0; i < 19; i++) {
+    if (mqueues[i].id == id || found == 1) {
+      found = 1;
+      mqueues[i] = mqueues[i+1];
+    }
+  }
+  if (found == 1) mindex--;
+}
