@@ -176,7 +176,7 @@ def profile_id(request, username, uid):
       fav = False
     if ('addMyself' in request.POST) and not queue.contains(p):
       node = Node(user=p, queue=queue, position=qsize)
-      queue.size = qsize + 1
+      queue.size = queue.size + 1
       queue.save()
       node.save()
       contains = True
@@ -502,11 +502,15 @@ def pebble_update_status(request):
     qid = request.POST['id']
     username = request.POST['username']
     typ = request.POST['type']
+    print typ
+    print username
+    print qid
     user = User.objects.get(username=username)
     puser = UserProfile.objects.get(user=user)
     queue = Queue.objects.get(id=qid)
-    node = Node.objects.get(queue=queue, user=puser)
-
+    nodes = Node.objects.filter(queue=queue, user=puser)
+    node = nodes[0]
+    print node
     if typ == "nstart":
       node.changeStatus("Not started")
       node.save()
@@ -514,13 +518,15 @@ def pebble_update_status(request):
       node.changeStatus("In progress")
       node.save()
     elif typ == "remove":
-      del_pos = node.pos
+      del_pos = node.position
       node.delete()
       queue.size = queue.size - 1
       queue.save()
       nodes = list(Node.objects.filter(queue=queue))
       for n in nodes:
         if n.position > del_pos:
+          print n.user.user.username
+          print n.position
           n.position = n.position - 1
           n.save()
     elif typ == "up":
