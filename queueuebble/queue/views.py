@@ -183,13 +183,14 @@ def profile_id(request, username, uid):
     if 'removeMyself' in request.POST:
       if not user_node == None:
         del_pos = user_node.position
+        if queue.size > 1 and del_pos < 2:
+            nextUserNode = None
+            nextUserNode = nodes[2]
+            uNextUser = nextUserNode.user.user
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [uNextUser.email], fail_silently=False)
         user_node.delete()
         queue.size = queue.size - 1
         queue.save()
-        if queue.size > 0:
-            nextUserNode = nodes[del_pos + 1]
-            uNextUser = nextUserNode.user.user
-            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [uNextUser.email], fail_silently=False)
         nodes = list(Node.objects.filter(queue=queue))
         for n in nodes:
           if n.position > del_pos:
@@ -205,12 +206,13 @@ def profile_id(request, username, uid):
         if not len(uRemoveNodes) == 0:
           uRemoveNode = uRemoveNodes[0];
           uRemovePos = uRemoveNode.position
-          uRemoveNode.delete();
-          queue.size = queue.size - 1
-          if queue.size > 0:
-            nextUserNode = nodes[uRemovePos + 1]
+          if queue.size > 1 and uRemovePos < 2:
+            nextUserNode = None
+            nextUserNode = nodes[2]
             uNextUser = nextUserNode.user.user
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [uNextUser.email], fail_silently=False)
+          uRemoveNode.delete()
+          queue.size = queue.size - 1
           queue.save();
           nodes = list(Node.objects.filter(queue=queue))
           for n in nodes:
