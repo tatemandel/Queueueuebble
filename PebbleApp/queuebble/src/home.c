@@ -19,8 +19,16 @@ static AppTimer *timer;
 
 static char username[50];
 
+typedef struct notif {
+  int first;
+  int second;
+} notif;
+
 int received = 0;
 int whichUpdate = 0;
+
+notif curr_status[20];
+int status_size = 0;
 
 enum {
   BLANK, // 0
@@ -71,7 +79,7 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     strcpy(name, name_t->value->cstring);
     int id = id_t->value->int32;
     int size = size_t->value->int32;
-    int status = status_t->value->uint8;
+    int status = status_t->value->int32;
     int num = num_t->value->int32;
     int update = update_t->value->int32;
     aqueues_add(size, id, name, status);
@@ -105,13 +113,15 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
       //      layer_remove_from_parent(text_layer_get_layer(text_layer));
       //      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
       if (update == 0) {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "update is 0");
 	mqueues_show();
       }
       else if (update == 1) {
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "update is 1");
 	layer_mark_dirty(getMemberWindowLayer());
       }
     }
-  } else if (user_t && id_t && status_t && num_t && pos_t && type_t && update_t) { // users added to a queue
+  } else if (user_t && id_t && status_t && num_t && pos_t && type_t && update_t) { // users added
     received++;
     char user[50];
     strcpy(user, user_t->value->cstring);
@@ -131,21 +141,41 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     }
     if (received == num) {
       received = 0;
-      if (type == 1 && show_t == NULL) {
-	if (update == 0) {
-	  aqueue_show(id);
-	}
-	else if (update == 1) {
+      if (type == 1) {
+        if (show_t == NULL && update == 0) {
+          aqueue_show(id);
+        } else if (show_t) { // changed something about queues. Make sure previous page is still correct
+          aqueues_clean(id, num);
+        } else if (update == 1) {
 	  layer_mark_dirty(getAQueueWindowLayer());
-	}
-      } else if (type == 2 && show_t == NULL) {
-	if (update == 0) {
+        }
+      } else if (type == 2) {
+        if (show_t == NULL && update == 0) {
 	  mqueue_show(id);
-	}
-	else if (update == 1) {
+        } else if (show_t) {
+          mqueues_clean(id);
+          APP_LOG(APP_LOG_LEVEL_DEBUG, "cleaning members");
+          // clean the member page to not have the queue anymore
+        } else if (update == 1) {
 	  layer_mark_dirty(getMQueueWindowLayer());
-	}
+        }
       }
+    }
+  } else if (id_t && pos_t) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "got a response for notifications");
+    int i;
+    int found = 0;
+    for (i = 0; i < status_size; i++) {
+      if (curr_status[i].first == id_t->value->int32) {
+        curr_status[i].second = pos_t->value->int32;
+        found = 1;
+      }
+    }
+    if (found == 0) {
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "set notif");
+      curr_status[status_size].first = id_t->value->int32;
+      curr_status[status_size].second = pos_t->value->int32;
+      status_size++;
     }
   } else if (no_data_t && type_t && update_t) {
     if (no_data_t->value->int32 == 3 && type_t->value->int32 == 1) {
@@ -164,15 +194,17 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
 	layer_mark_dirty(getMQueueWindowLayer());
       }
     }
-  } else if (no_data_t) {
-    layer_remove_from_parent(text_layer_get_layer(text_layer));
-    layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
-    if (no_data_t->value->int32 == 1) { 
-      aqueues_show();
+  } else if (no_data_t && update_t) {
+    if (update_t->value->int32 == 0) {
+      layer_remove_from_parent(text_layer_get_layer(text_layer));
+      layer_add_child(window_layer, menu_layer_get_layer(menu_layer));
+      if (no_data_t->value->int32 == 1) { 
+        aqueues_show();
+      }
+      else if (no_data_t->value->int32 == 2) {
+        mqueues_show();
+      } 
     }
-    else if (no_data_t->value->int32 == 2) {
-      mqueues_show();
-    } 
   } else if (user_t) {
     strcpy(username, user_t->value->cstring);
     layer_remove_from_parent(text_layer_get_layer(text_layer));
@@ -224,12 +256,29 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
   return MENU_CELL_BASIC_HEADER_HEIGHT;
 }
 
+void check_notify() {
+  int i;
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  dict_write_cstring(iter, -1, "checkNext");
+  dict_write_cstring(iter, -2, username);
+  for (i = 0; i < status_size; i++) {
+    Tuplet value = TupletInteger(curr_status[i].first, curr_status[i].second);
+    dict_write_tuplet(iter, &value);
+  }
+  dict_write_end(iter);
+  app_message_outbox_send();
+}
+
 void update_status(char *uname, int id, int status) {
   char *type = status == 0 ? "nstart" : status == 1 ? "progress" : 
-               status == 2 ? "remove" : status == 3 ? "up" : 
-               status == 4 ? "down" : "favorite";
+               status == 2 ? "aremove" : status == 3 ? "up" : 
+               status == 4 ? "down" : status == 5 ? "mremove" : "favorite";
   if (status == 2 || status == 3 || status == 4) {
     aqueue_reset();
+  }
+  if (status == 5) {
+    mqueue_reset();
   }
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);
@@ -277,17 +326,22 @@ static void timer_callback(void *data) {
     aqueues_reset();
     send_messages("adminUpdate");
   }
-  else if (whichUpdate == 2) {
-    whichUpdate = 3;
-    aqueue_reset();
-    int a = get_aid();
-    load_queue(a, "aqueueUpdate");
-  }
-  else if (whichUpdate == 3) {
+  else if (whichUpdate == 4) {
     whichUpdate = 0;
     aqueue_reset();
+    int a = get_aid();
+    if (a > 0) load_queue(a, "aqueueUpdate");
+  }
+  else if (whichUpdate == 3) {
+    whichUpdate = 4;
+    aqueue_reset();
     int m = get_mid();
-    load_queue(m, "mqueueUpdate");
+    if (m > 0) load_queue(m, "mqueueUpdate");
+  }
+  else if (whichUpdate == 2) {
+    whichUpdate = 3;
+    check_notify();
+    // check for position 1
   }
   timer = app_timer_register(TIME_INTERVAL, timer_callback, NULL);
 }

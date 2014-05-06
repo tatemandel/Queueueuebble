@@ -153,6 +153,7 @@ def profile_id(request, username, uid):
   nodes = list(Node.objects.filter(queue=queue))
   nodes.sort(key=lambda x: x.position)
   qsize = queue.size
+
   p = UserProfile.objects.get(user=request.user)
   myqueue = p in queue.owner.all()
   contains = queue.contains(p)
@@ -194,7 +195,7 @@ def profile_id(request, username, uid):
             n.position = n.position - 1
             if (n.position == 1):
               send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email],  fail_silently=False)
-              n.save()
+          n.save()
       contains = False
     if 'removeFromMyQueue' in request.POST:
       uRemoveName = request.POST.get('nodeToRemove2')
@@ -207,15 +208,14 @@ def profile_id(request, username, uid):
           uRemovePos = uRemoveNode.position
           uRemoveNode.delete()
           queue.size = queue.size - 1
-          if (n.position == 1):
-            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
           queue.save();
           nodes = list(Node.objects.filter(queue=queue))
           for n in nodes:
             if n.position > uRemovePos:
               n.position = n.position - 1
-              
               n.save()
+              if (n.position == 1):
+                send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
     if 'changeStatus' in request.POST:
       userNameS = request.POST.get('statusChangeUser')
       if not userNameS == None:
@@ -565,6 +565,20 @@ def pebble_update_status(request):
               'position' : n.position,
               'status' : n.status }
         data.append(d)
+    return HttpResponse(json.dumps(data), content_type="application/json")
+  else:
+    return HttpResponse("Nothing to get", status=400)
+
+@csrf_exempt
+def pebble_notify(request):
+  if request.method == 'POST':
+    username = request.POST['username']
+    user = User.objects.get(username=username)
+    puser = UserProfile.objects.get(user=user)
+    data = []
+    for n in Node.objects.filter(user=puser):
+      data.append({ n.queue.id : n.position })
+
     return HttpResponse(json.dumps(data), content_type="application/json")
   else:
     return HttpResponse("Nothing to get", status=400)

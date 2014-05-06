@@ -10,9 +10,11 @@
             <ul class="nav nav-sidebar">
                 <li class="active"><a href="#">Overview</a></li>
             </ul>
+            
             <ul class="nav nav-sidebar">
-                <li> <a href="#"> Create Queue </a>
+                <li> 
                     <form id="add_queue_form" class="navbar-form" method="post" action="/dashboard/">
+                    <li style="color:#fff; font-weight: 700; font-size: 13px; letter-spacing: .1em; text-transform: uppercase;"> Create Queue </li>
                     {% csrf_token %}
                     <input type="text" placeholder="queue name" name="queuename"/> 
                     <button type="submit" name="createQueue" value="Submit" class='form-control'> Create </button>
@@ -21,8 +23,8 @@
             </ul>
 
             <ul class="nav nav-sidebar"> 
-                <li> <a href="#"> Search </a>
                 <form action="/search/" class="navbar-form" method="get">
+                    <li style="color:#fff; font-weight: 700; font-size: 13px; letter-spacing: .1em; text-transform: uppercase;"> Search </li>
                     <input type="text" name="q"/>
                     <button type="submit" value="Search" class='form-control' data-toggle="modal" data-target="#searchModal"> Search </button>
                 </form>
@@ -60,8 +62,12 @@
                     {% endif %}
                     </form>
                 </li>
-              {% endfor %}
-            </ul>
+                {% endfor %}
+                </ul>
+            
+            {% if not owned %}
+              <p>You don't own any queue yet. Create one now!</p>
+            {% endif %}
         </div>
 
         <div class="col-md-4">
@@ -69,6 +75,9 @@
             {% for q in qin %}
                 <a href="/profile/{{ q.creator.user.username }}/{{ q.id }}/">{{ q.name }}</a><br/>
             {% endfor %}
+            {% if not qin %}
+            <p>You are not in any queue</p>
+            {% endif %}
         </div>
 
         <div class="col-md-4">
@@ -85,14 +94,5 @@
         
 </div>
 {% endblock %}
-
-
-<h2>Favorites</h2>
-{% for fav in favorites %}
-<a href="/profile/{{ fav.creator.user.username }}/{{ fav.id }}/">{{ fav.name }}</a>
-{% endfor %}
-{% if not favorites %}
-<p>You have no favorites</p>
-{% endif %}
 
 

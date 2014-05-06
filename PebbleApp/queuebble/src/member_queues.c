@@ -82,6 +82,7 @@ static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index,
   mqueue q = mqueues[i];
   //layer_remove_from_parent(menu_layer_get_layer(menu_layer));
   mqueue_reset();
+  set_mid(q.id);
   load_queue(q.id, "mqueue");
 }
 
@@ -158,4 +159,16 @@ void mqueues_add(char *name, char *creator, int pos, int id, int status) {
 
 void mqueues_reset() {
   mindex = 0;
+}
+
+void mqueues_clean(int id) {
+  int i = 0;
+  int found = 0;
+  for (i = 0; i < 19; i++) {
+    if (mqueues[i].id == id || found == 1) {
+      found = 1;
+      mqueues[i] = mqueues[i+1];
+    }
+  }
+  if (found == 1) mindex--;
 }

@@ -66,6 +66,7 @@ function getOwned(username) {
       if (ob.length == 0) {
         d = {};
 	d["10"] = 1;
+        d["12"] = 0;
         data.push(d);  
       }
       ob.forEach(function(e) { 
@@ -73,7 +74,7 @@ function getOwned(username) {
         d["2"] = e['id'];
         d["3"] = e['name'];
         d["4"] = e['size'];
-        d["5"] = e['status'] == "true" ? 1 : 0;
+        d["5"] = e['status'] ? 1 : 0;
         d["6"] = ob.length;
 	d["12"] = 0;
         data.push(d);
@@ -103,6 +104,7 @@ function getUpdatedOwned(username) {
       if (ob.length == 0) {
         d = {};
 	d["10"] = 1;
+        d["12"] = 1;
         data.push(d);  
       }
       ob.forEach(function(e) { 
@@ -110,7 +112,7 @@ function getUpdatedOwned(username) {
         d["2"] = e['id'];
         d["3"] = e['name'];
         d["4"] = e['size'];
-        d["5"] = e['status'] == "true" ? 1 : 0;
+        d["5"] = e['status'] ? 1 : 0;
         d["6"] = ob.length;
 	d["12"] = 1;
         data.push(d);
@@ -140,6 +142,7 @@ function getMember(username) {
       if (ob.length == 0) {
         d = {};
 	d["10"] = 2;
+        d["12"] = 0;
         data.push(d);  
       }
       ob.forEach(function(e) { 
@@ -178,6 +181,7 @@ function getUpdatedMember(username) {
       if (ob.length == 0) {
         d = {};
 	d["10"] = 2;
+        d["12"] = 1;
         data.push(d);  
       }
       ob.forEach(function(e) { 
@@ -217,6 +221,7 @@ function getQueue(id, type) {
         d = {};
 	d["10"] = 3;
 	d["9"] = type;
+        d["12"] = 0;
         data.push(d);  
       }
       ob.forEach(function(e) { 
@@ -256,6 +261,7 @@ function getUpdatedQueue(id, type) {
         d = {};
 	d["10"] = 3;
 	d["9"] = type;
+        d["12"] = 1;
         data.push(d);  
       }
       ob.forEach(function(e) { 
@@ -277,7 +283,7 @@ function getUpdatedQueue(id, type) {
   http.send(params);
 }
 
-function updateStatus(id, username, type) {
+function updateStatus(id, username, type, admin) {
   var http = new XMLHttpRequest();
   var params = "id=" + id + "&username=" + username + "&type=" + type;
   http.open("POST", "HTTP://54.84.161.157/pebble_update_status/", true);
@@ -307,12 +313,70 @@ function updateStatus(id, username, type) {
           d["5"] = e['status'];
           d["6"] = ob.length;
           d["8"] = e['position'];
-          d["9"] = 1;
+          d["9"] = admin;
+          d["11"] = 0; // 0 for don't show
           d["12"] = 0; // 0 for don't show
           data.push(d);
         });
         sendMessages(data);
       }
+    } else {
+      console.log(http.responseText);
+    }
+  }
+  http.send(params);
+}
+
+function getNotifications(payload) {
+  var data = {};
+  var params = "username=" + payload[-2];
+  for (var i in payload) {
+    console.log("" + i + ": " + payload[i]);
+  }
+  console.log(data);
+  console.log(params);
+  var http = new XMLHttpRequest();
+  http.open("POST", "HTTP://54.84.161.157/pebble_notify/", true);
+
+  http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  http.setRequestHeader("Content-length", params.length);
+  http.setRequestHeader("Connection", "close");
+
+  http.onload = function() {
+    if (http.status == 200) {
+      console.log(http.responseText);
+      var ob = JSON.parse(http.responseText);
+      var data = [];
+      console.log(ob)
+      for (var index in ob) {
+        console.log(ob[index]);
+        var item = ob[index];
+        for (var key in item) {
+          console.log(key);
+          var ikey = parseInt(key);
+          console.log(ikey);
+          if (ikey in payload) {
+            console.log("in payload");
+            if (payload[ikey] != item[key]) {
+              console.log("key: " + key + ", plk: " + payload[ikey] + ", obk: " + item[key]);
+              d = {};
+              d["2"] = key;
+              d["8"] = item[key];
+              data.push(d);
+              if (payload[ikey] != 0 && item[key] == 0) {
+                Pebble.showSimpleNotificationOnPebble("You're up!", "You're next on queue " + key);
+              }
+            }
+          } else {
+            d = {};
+            d["2"] = ikey;
+            d["8"] = item[key];
+            console.log("item[key]: " + item[key]);
+            data.push(d);
+          }
+        }
+      }
+      sendMessages(data);
     } else {
       console.log(http.responseText);
     }
@@ -333,16 +397,24 @@ Pebble.addEventListener("appmessage", function(e) {
   } else if (t == "aqueue") {
     // 1 is admin, 2 is member
     getQueue(e.payload[2], 1);
-  } else if (t == "nstart" || t == "progress" || t == "remove" || t == "up" || 
-             t == "down" || t == "favorite") {
-    updateStatus(e.payload[2], e.payload[3], t);
+  } else if (t == "nstart" || t == "progress" || t == "aremove" || t == "up" || 
+             t == "down" || t == "favorite" || t == "mremove") {
+    updateStatus(e.payload[2], 
+                 e.payload[3], 
+                 t == "mremove" || t == "aremove" ? "remove" : t, 
+                 t == "mremove" ? 2 : 1);
   } else if (t == "memberUpdate") {
     getUpdatedMember(e.payload[2]);
   } else if (t == "adminUpdate") {
     getUpdatedOwned(e.payload[2]);
   } else if (t == "aqueueUpdate") {
-      getUpdatedQueue(e.payload[2], 1);
+    getUpdatedQueue(e.payload[2], 1);
   } else if (t == "mqueueUpdate") {
-      getUpdatedQueue(e.payload[2], 2);
-  }
+    getUpdatedQueue(e.payload[2], 2);
+  } else {
+    if (e.payload[-1] == "checkNext") {
+      console.log(e.payload[-2]); // username
+      getNotifications(e.payload);
+    }
+  } 
  });

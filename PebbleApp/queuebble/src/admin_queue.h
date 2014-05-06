@@ -13,4 +13,5 @@ void aqueue_show(int id);
 void aqueue_add(char*, int, int, int);
 void aqueue_reset();
 int get_aid();
+void set_aid(int);
 Layer* getAQueueWindowLayer();

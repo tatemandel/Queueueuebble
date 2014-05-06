@@ -37,7 +37,7 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer,
   int i = cell_index->row;
   if (i < 0) return;
   char sub[20];
-  mini_snprintf(sub, 19, "Size: %d <%s>", aqueues[i].size, aqueues[i].status ? "OPEN" : "CLOSED");
+  mini_snprintf(sub, 19, "Size: %d <%s>", aqueues[i].size, aqueues[i].status == 1 ? "CLOSED" : "OPEN");
   menu_cell_basic_draw(ctx, cell_layer, aqueues[i].name, sub, NULL);
 }
 
@@ -79,6 +79,7 @@ static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index,
   aqueue q = aqueues[i];
   //layer_remove_from_parent(menu_layer_get_layer(menu_layer));
   aqueue_reset();
+  set_aid(q.id);
   load_queue(q.id, "aqueue");
 }
 
@@ -154,4 +155,14 @@ void aqueues_add(int size, int id, char* name, int status) {
 
 void aqueues_reset() {
   aindex = 0;
+}
+
+void aqueues_clean(int id, int num) {
+  int i = 0;
+  for (i = 0; i < 20; i++) {
+    if (aqueues[i].id == id) {
+      aqueues[i].size = num;
+      break;
+    }
+  }
 }
