@@ -543,6 +543,9 @@ def pebble_update_status(request):
         node2.position = node.position
         # update other
         node.position = node.position + 1;
+    elif typ == "favorite":
+      puser.favorites.add(queue)
+      puser.save()
           
     data = []
     # for n in nodes:
