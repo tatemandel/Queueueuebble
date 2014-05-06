@@ -212,7 +212,8 @@ Pebble.addEventListener("appmessage", function(e) {
   } else if (t == "aqueue") {
     // 1 is admin, 2 is member
     getQueue(e.payload[2], 1);
-  } else if (t == "nstart" || t == "progress" || t == "remove" || t == "up" || t == "down") {
+  } else if (t == "nstart" || t == "progress" || t == "remove" || t == "up" || 
+             t == "down" || t == "favorite") {
     updateStatus(e.payload[2], e.payload[3], t);
   }
 });

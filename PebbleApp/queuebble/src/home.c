@@ -194,7 +194,8 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
 
 void update_status(char *uname, int id, int status) {
   char *type = status == 0 ? "nstart" : status == 1 ? "progress" : 
-               status == 2 ? "remove" : status == 3 ? "up" : "down";
+               status == 2 ? "remove" : status == 3 ? "up" : 
+               status == 4 ? "down" : "favorite";
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);
   dict_write_cstring(iter, 1, type);
