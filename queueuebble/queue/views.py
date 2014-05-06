@@ -140,6 +140,8 @@ def confirm_reorder(request, queue):
     up_object = UserProfile.objects.get(user=user_object)
     no = nodes.get(user=up_object)
     no.position = i
+    if (no.position == 1):
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
     no.save()
     i = i + 1
 
@@ -161,14 +163,12 @@ def profile_id(request, username, uid):
     user_node = users_nodes[0]
 
   if request.method == 'POST':
-
     # ajax
     if request.POST.get('name') == "reorderQueue":
       confirm_reorder(request, queue)
       response = {'response' : "Order updated successfully!"}
       print response
       return HttpResponse(json.dumps(response), content_type="application/json")
-
     # not ajax
     if 'addFavorite' in request.POST:
       p.favorites.add(queue)
@@ -178,15 +178,13 @@ def profile_id(request, username, uid):
       fav = False
     if ('addMyself' in request.POST) and not queue.contains(p):
       node = Node(user=p, queue=queue, position=qsize)
-      queue.size = qsize + 1
+      queue.size = queue.size + 1
       queue.save()
       node.save()
       contains = True
-      nodes = list(Node.objects.filter(queue=queue))
     if 'removeMyself' in request.POST:
       if not user_node == None:
         del_pos = user_node.position
-        print del_pos
         user_node.delete()
         queue.size = queue.size - 1
         queue.save()
@@ -194,8 +192,9 @@ def profile_id(request, username, uid):
         for n in nodes:
           if n.position > del_pos:
             n.position = n.position - 1
-            n.save()
-        nodes.sort(key=lambda x: x.position)
+            if (n.position == 1):
+              send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email],  fail_silently=False)
+              n.save()
       contains = False
     if 'removeFromMyQueue' in request.POST:
       uRemoveName = request.POST.get('nodeToRemove2')
@@ -206,19 +205,17 @@ def profile_id(request, username, uid):
         if not len(uRemoveNodes) == 0:
           uRemoveNode = uRemoveNodes[0];
           uRemovePos = uRemoveNode.position
-          uRemoveNode.delete();
+          uRemoveNode.delete()
           queue.size = queue.size - 1
-          if queue.size > 0:
-            nextUserNode = nodes[uRemovePos + 1]
-            uNextUser = nextUserNode.user.user
-            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [uNextUser.email], fail_silently=False)
+          if (n.position == 1):
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
           queue.save();
           nodes = list(Node.objects.filter(queue=queue))
           for n in nodes:
             if n.position > uRemovePos:
               n.position = n.position - 1
+              
               n.save()
-          nodes.sort(key=lambda x: x.position)
     if 'changeStatus' in request.POST:
       userNameS = request.POST.get('statusChangeUser')
       if not userNameS == None:
@@ -229,8 +226,6 @@ def profile_id(request, username, uid):
           userSNode = userSNodes[0];
           userSNode.status = userSNode.status + 1;
           userSNode.save()
-          nodes = list(Node.objects.filter(queue=queue))
-          nodes.sort(key=lambda x: x.position)
     if 'addOwner' in request.POST:
       usernameO = request.POST.get('newowner')
       if User.objects.filter(username=usernameO):
@@ -244,7 +239,8 @@ def profile_id(request, username, uid):
     if 'destroy' in request.POST:
       queue.delete()
       return HttpResponseRedirect('/dashboard/')
-
+    nodes = list(Node.objects.filter(queue=queue))
+    nodes.sort(key=lambda x: x.position)
   users_nodes = Node.objects.filter(queue=queue, user=p)
   owners = queue.owner.all()
   user_node = None
@@ -463,8 +459,11 @@ def pebble_get_admin(request):
 @csrf_exempt
 def pebble_get_member(request):
   if request.method == 'POST':
+    print "dslkfj"
     username = request.POST['username']
+    print "here"
     user = User.objects.get(username=username)
+    print user
     if user is not None:
       puser = UserProfile.objects.get(user=user)
       data = []
@@ -499,4 +498,73 @@ def pebble_get_queue(request):
   else:
     return HttpResponse("Nothing to get", status=400)
 
-
+@csrf_exempt
+def pebble_update_status(request):
+  if request.method == 'POST':
+    qid = request.POST['id']
+    username = request.POST['username']
+    print username
+    typ = request.POST['type']
+    user = User.objects.get(username=username)
+    puser = UserProfile.objects.get(user=user)
+    print qid
+    queue = Queue.objects.get(id=qid)
+    nodes = Node.objects.filter(queue=queue, user=puser)
+    node = nodes[0]
+    if typ == "nstart":
+      node.changeStatus("Not started")
+      node.save()
+    elif typ == "progress":
+      node.changeStatus("In progress")
+      node.save()
+    elif typ == "remove":
+      del_pos = node.position
+      node.delete()
+      queue.size = queue.size - 1
+      queue.save()
+      nodes = list(Node.objects.filter(queue=queue))
+      for n in nodes:
+        if n.position > del_pos:
+          n.position = n.position - 1
+          if n.position == 1:
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
+          n.save()
+    elif typ == "up":
+      if not node.position == 0:
+        node2 = Node.objects.get(queue=queue, position = node.position - 1)
+        node2.position = node.position
+        node2.save()
+        if node.position == 1:
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
+        # update other
+        node.position = node.position - 1;
+        node.save()
+        if node.position == 1:
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
+    elif typ == "down":
+      if not node.position == queue.size - 1:
+        node2 = Node.objects.get(queue=queue, position = node.position + 1)
+        node2.position = node.position
+        node2.save()
+        if node2.position == 1:
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node2.user.user.email], fail_silently=False)
+        # update other
+        node.position = node.position + 1;
+        node.save()
+        if node.position == 1:
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node.user.user.email], fail_silently=False)
+    elif typ == "favorite":
+      print "favorites"
+      puser.favorites.add(queue)
+      puser.save()
+          
+    data = []
+    # for n in nodes:
+    #   d = { 'username' : n.user.user.username,
+    #         'id' : n.queue.id,
+    #         'position' : n.position,
+    #         'status' : n.status }
+    #   data.append(d)
+    return HttpResponse(json.dumps(data), content_type="application/json")
+  else:
+    return HttpResponse("Nothing to get", status=400)
