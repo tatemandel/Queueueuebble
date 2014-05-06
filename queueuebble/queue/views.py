@@ -536,20 +536,24 @@ def pebble_update_status(request):
       if not node.position == 0:
         node2 = Node.objects.get(queue=queue, position = node.position - 1)
         node2.position = node.position
+        node2.save()
         if (node.position == 1):
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
         # update other
         node.position = node.position - 1;
+        node.save()
         if (node.position == 1):
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
     elif typ == "down":
       if not node.position == queue.size - 1:
         node2 = Node.objects.get(queue=queue, position = node.position + 1)
         node2.position = node.position
+        node2.save()
         if (node2.position == 1):
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node2.user.user.email], fail_silently=False)
         # update other
         node.position = node.position + 1;
+        node.save()
         if (node.position == 1):
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node.user.user.email], fail_silently=False)
     elif typ == "favorite":
