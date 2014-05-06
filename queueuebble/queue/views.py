@@ -161,14 +161,12 @@ def profile_id(request, username, uid):
     user_node = users_nodes[0]
 
   if request.method == 'POST':
-
     # ajax
     if request.POST.get('name') == "reorderQueue":
       confirm_reorder(request, queue)
       response = {'response' : "Order updated successfully!"}
       print response
       return HttpResponse(json.dumps(response), content_type="application/json")
-
     # not ajax
     if 'addFavorite' in request.POST:
       p.favorites.add(queue)
@@ -182,20 +180,21 @@ def profile_id(request, username, uid):
       queue.save()
       node.save()
       contains = True
-      nodes = list(Node.objects.filter(queue=queue))
     if 'removeMyself' in request.POST:
       if not user_node == None:
         del_pos = user_node.position
-        print del_pos
         user_node.delete()
         queue.size = queue.size - 1
         queue.save()
+        if queue.size > 0:
+            nextUserNode = nodes[del_pos + 1]
+            uNextUser = nextUserNode.user.user
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [uNextUser.email], fail_silently=False)
         nodes = list(Node.objects.filter(queue=queue))
         for n in nodes:
           if n.position > del_pos:
             n.position = n.position - 1
             n.save()
-        nodes.sort(key=lambda x: x.position)
       contains = False
     if 'removeFromMyQueue' in request.POST:
       uRemoveName = request.POST.get('nodeToRemove2')
@@ -208,8 +207,9 @@ def profile_id(request, username, uid):
           uRemovePos = uRemoveNode.position
           uRemoveNode.delete();
           queue.size = queue.size - 1
-          if queue.size>0:
-            uNextUser = User.objects.get(username=uRemoveNodes[1])
+          if queue.size > 0:
+            nextUserNode = nodes[uRemovePos + 1]
+            uNextUser = nextUserNode.user.user
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [uNextUser.email], fail_silently=False)
           queue.save();
           nodes = list(Node.objects.filter(queue=queue))
@@ -217,7 +217,6 @@ def profile_id(request, username, uid):
             if n.position > uRemovePos:
               n.position = n.position - 1
               n.save()
-          nodes.sort(key=lambda x: x.position)
     if 'changeStatus' in request.POST:
       userNameS = request.POST.get('statusChangeUser')
       if not userNameS == None:
@@ -228,8 +227,6 @@ def profile_id(request, username, uid):
           userSNode = userSNodes[0];
           userSNode.status = userSNode.status + 1;
           userSNode.save()
-          nodes = list(Node.objects.filter(queue=queue))
-          nodes.sort(key=lambda x: x.position)
     if 'addOwner' in request.POST:
       usernameO = request.POST.get('newowner')
       if User.objects.filter(username=usernameO):
@@ -243,7 +240,8 @@ def profile_id(request, username, uid):
     if 'destroy' in request.POST:
       queue.delete()
       return HttpResponseRedirect('/dashboard/')
-
+    nodes = list(Node.objects.filter(queue=queue))
+    nodes.sort(key=lambda x: x.position)
   users_nodes = Node.objects.filter(queue=queue, user=p)
   owners = queue.owner.all()
   user_node = None
