@@ -151,3 +151,13 @@ void aqueues_add(int size, int id, char* name, int status) {
 void aqueues_reset() {
   aindex = 0;
 }
+
+void aqueues_clean(int id, int num) {
+  int i = 0;
+  for (i = 0; i < 20; i++) {
+    if (aqueues[i].id == id) {
+      aqueues[i].size = num;
+      break;
+    }
+  }
+}

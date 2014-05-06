@@ -108,10 +108,18 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
     }
     if (received == num) {
       received = 0;
-      if (type == 1 && show_t == NULL) {
-        aqueue_show();
-      } else if (type == 2 && show_t == NULL) {
-        mqueue_show();
+      if (type == 1) {
+        if (show_t == NULL) {
+          aqueue_show();
+        } else { // changed something about queues. Make sure previous page is still correct
+          aqueues_clean(id, num);
+        }
+      } else if (type == 2) {
+        if (show_t == NULL) {
+          mqueue_show();
+        } else {
+          // clean the member page to not have the queue anymore
+        }
       }
     }
   } else if (no_data_t && type_t) {
@@ -183,10 +191,13 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
 
 void update_status(char *uname, int id, int status) {
   char *type = status == 0 ? "nstart" : status == 1 ? "progress" : 
-               status == 2 ? "remove" : status == 3 ? "up" : 
-               status == 4 ? "down" : "favorite";
+               status == 2 ? "aremove" : status == 3 ? "up" : 
+               status == 4 ? "down" : status == 5 ? "mremove" : "favorite";
   if (status == 2 || status == 3 || status == 4) {
     aqueue_reset();
+  }
+  if (status == 5) {
+    mqueue_reset();
   }
   DictionaryIterator *iter;
   app_message_outbox_begin(&iter);

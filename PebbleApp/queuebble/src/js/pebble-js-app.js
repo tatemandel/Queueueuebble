@@ -161,7 +161,7 @@ function getQueue(id, type) {
   http.send(params);
 }
 
-function updateStatus(id, username, type) {
+function updateStatus(id, username, type, admin) {
   var http = new XMLHttpRequest();
   var params = "id=" + id + "&username=" + username + "&type=" + type;
   http.open("POST", "HTTP://54.84.161.157/pebble_update_status/", true);
@@ -191,7 +191,7 @@ function updateStatus(id, username, type) {
           d["5"] = e['status'];
           d["6"] = ob.length;
           d["8"] = e['position'];
-          d["9"] = 1;
+          d["9"] = admin;
           d["11"] = 0; // 0 for don't show
           data.push(d);
         });
@@ -217,8 +217,11 @@ Pebble.addEventListener("appmessage", function(e) {
   } else if (t == "aqueue") {
     // 1 is admin, 2 is member
     getQueue(e.payload[2], 1);
-  } else if (t == "nstart" || t == "progress" || t == "remove" || t == "up" || 
-             t == "down" || t == "favorite") {
-    updateStatus(e.payload[2], e.payload[3], t);
+  } else if (t == "nstart" || t == "progress" || t == "aremove" || t == "up" || 
+             t == "down" || t == "favorite" || t == "mremove") {
+    updateStatus(e.payload[2], 
+                 e.payload[3], 
+                 t == "mremove" || t == "aremove" ? "remove" : t, 
+                 t == "mremove" ? 2 : 1);
   }
 });

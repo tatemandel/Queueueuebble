@@ -64,11 +64,11 @@ static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index,
   switch (cell_index->row) {
   case 0:
     // remove self from queue
-    update_status(curr_mmem.username, curr_mmem.id, 2);
+    update_status(curr_mmem.username, curr_mmem.id, 5);
     break;
   case 1:
     // add to favorites
-    update_status(curr_mmem.username, curr_mmem.id, 5);
+    update_status(curr_mmem.username, curr_mmem.id, 6);
     break;
   }
 }
