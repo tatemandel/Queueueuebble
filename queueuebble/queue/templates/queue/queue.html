@@ -243,12 +243,43 @@
 {% if myqueue %}
   <!-- <input draggable='false' type="hidden" name="reorderData" id="reorderData"/> -->
   <input type="submit" id="confirmReorder" value="Submit Reordering"/>
+  <div id="status-area"></div>
   <div id="reorderResponse"></div>
 {% endif %}
 {% if myqueue %}
   <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js">
   </script>
   <script type="text/javascript" src="http://farhadi.ir/projects/html5sortable/jquery.sortable.js">
+  </script>
+  <script>
+      (function($) {
+          $.fn.flash_message = function(options) {
+
+              options = $.extend({
+                  text: 'Done',
+                  time: 1000,
+                  how: 'before',
+                  class_name: ''
+              }, options);
+
+              return $(this).each(function() {
+                  if( $(this).parent().find('.flash_message').get(0) )
+                  return;
+
+                  var message = $('<span />', {
+                      'class': 'flash_message ' + options.class_name,
+                      text: options.text
+                  }).hide().fadeIn('fast');
+
+                  $(this)[options.how](message);
+
+                  message.delay(options.time).fadeOut('normal', function() {
+                      $(this).remove();
+                  });
+
+              });
+          };
+      })(jQuery);
   </script>
   <script>
     $(function() {
@@ -296,7 +327,10 @@
             csrfmiddlewaretoken: '{{ csrf_token }}',
             arr : datas,
             success: function(json) {
-              $('#reorderResponse').append("Reorder successful!");
+                $('#status-area').flash_message({
+                    text: 'Reorder successful!',
+                    how: 'append'
+                });
             },
           },
         });
