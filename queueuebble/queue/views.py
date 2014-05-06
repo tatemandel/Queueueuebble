@@ -207,15 +207,14 @@ def profile_id(request, username, uid):
           uRemovePos = uRemoveNode.position
           uRemoveNode.delete()
           queue.size = queue.size - 1
-          if (n.position == 1):
-            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
           queue.save();
           nodes = list(Node.objects.filter(queue=queue))
           for n in nodes:
             if n.position > uRemovePos:
               n.position = n.position - 1
-              
               n.save()
+              if (n.position == 1):
+                send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
     if 'changeStatus' in request.POST:
       userNameS = request.POST.get('statusChangeUser')
       if not userNameS == None:
