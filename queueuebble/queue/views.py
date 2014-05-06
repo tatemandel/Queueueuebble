@@ -503,13 +503,13 @@ def pebble_update_status(request):
   if request.method == 'POST':
     qid = request.POST['id']
     username = request.POST['username']
+    print username
     typ = request.POST['type']
     user = User.objects.get(username=username)
     puser = UserProfile.objects.get(user=user)
+    print qid
     queue = Queue.objects.get(id=qid)
     nodes = Node.objects.filter(queue=queue, user=puser)
-    qnodes = list(Nodes.object.filter(queue))
-    qnodes.sort(key=lambda x: x.position)
     node = nodes[0]
     if typ == "nstart":
       node.changeStatus("Not started")
@@ -554,6 +554,7 @@ def pebble_update_status(request):
         if node.position == 1:
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node.user.user.email], fail_silently=False)
     elif typ == "favorite":
+      print "favorites"
       puser.favorites.add(queue)
       puser.save()
           
