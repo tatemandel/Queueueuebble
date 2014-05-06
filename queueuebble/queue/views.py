@@ -140,7 +140,7 @@ def confirm_reorder(request, queue):
     up_object = UserProfile.objects.get(user=user_object)
     no = nodes.get(user=up_object)
     no.position = i
-    if (no.position == 2):
+    if (no.position == 1):
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
     no.save()
     i = i + 1
@@ -192,7 +192,7 @@ def profile_id(request, username, uid):
         for n in nodes:
           if n.position > del_pos:
             n.position = n.position - 1
-            if (n.position == 2):
+            if (n.position == 1):
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
             n.save()
       contains = False
@@ -207,7 +207,7 @@ def profile_id(request, username, uid):
           uRemovePos = uRemoveNode.position
           uRemoveNode.delete()
           queue.size = queue.size - 1
-          if (n.position == 2):
+          if (n.position == 1):
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
           queue.save();
           nodes = list(Node.objects.filter(queue=queue))
@@ -529,28 +529,28 @@ def pebble_update_status(request):
           print n.user.user.username
           print n.position
           n.position = n.position - 1
-          if (n.position == 2):
+          if (n.position == 1):
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
           n.save()
     elif typ == "up":
       if not node.position == 0:
         node2 = Node.objects.get(queue=queue, position = node.position - 1)
         node2.position = node.position
-        if (node.position == 2):
+        if (node.position == 1):
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
         # update other
         node.position = node.position - 1;
-        if (node.position == 2):
+        if (node.position == 1):
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
     elif typ == "down":
       if not node.position == queue.size - 1:
         node2 = Node.objects.get(queue=queue, position = node.position + 1)
         node2.position = node.position
-        if (node2.position == 2):
+        if (node2.position == 1):
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node2.user.user.email], fail_silently=False)
         # update other
         node.position = node.position + 1;
-        if (node.position == 2):
+        if (node.position == 1):
             send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node.user.user.email], fail_silently=False)
           
     data = []
