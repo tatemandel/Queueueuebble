@@ -19,8 +19,16 @@ static AppTimer *timer;
 
 static char username[50];
 
+typedef struct notif {
+  int first;
+  int second;
+} notif;
+
 int received = 0;
 int whichUpdate = 0;
+
+notif curr_status[20];
+int status_size = 0;
 
 enum {
   BLANK, // 0
@@ -153,6 +161,22 @@ static void in_received_handler(DictionaryIterator *iter, void *context) {
         }
       }
     }
+  } else if (id_t && pos_t) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "got a response for notifications");
+    int i;
+    int found = 0;
+    for (i = 0; i < status_size; i++) {
+      if (curr_status[i].first == id_t->value->int32) {
+        curr_status[i].second = pos_t->value->int32;
+        found = 1;
+      }
+    }
+    if (found == 0) {
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "set notif");
+      curr_status[status_size].first = id_t->value->int32;
+      curr_status[status_size].second = pos_t->value->int32;
+      status_size++;
+    }
   } else if (no_data_t && type_t && update_t) {
     if (no_data_t->value->int32 == 3 && type_t->value->int32 == 1) {
       if (update_t->value->int32 == 0) {
@@ -232,6 +256,20 @@ static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t s
   return MENU_CELL_BASIC_HEADER_HEIGHT;
 }
 
+void check_notify() {
+  int i;
+  DictionaryIterator *iter;
+  app_message_outbox_begin(&iter);
+  dict_write_cstring(iter, -1, "checkNext");
+  dict_write_cstring(iter, -2, username);
+  for (i = 0; i < status_size; i++) {
+    Tuplet value = TupletInteger(curr_status[i].first, curr_status[i].second);
+    dict_write_tuplet(iter, &value);
+  }
+  dict_write_end(iter);
+  app_message_outbox_send();
+}
+
 void update_status(char *uname, int id, int status) {
   char *type = status == 0 ? "nstart" : status == 1 ? "progress" : 
                status == 2 ? "aremove" : status == 3 ? "up" : 
@@ -288,17 +326,22 @@ static void timer_callback(void *data) {
     aqueues_reset();
     send_messages("adminUpdate");
   }
-  else if (whichUpdate == 2) {
-    whichUpdate = 3;
+  else if (whichUpdate == 4) {
+    whichUpdate = 0;
     aqueue_reset();
     int a = get_aid();
     if (a > 0) load_queue(a, "aqueueUpdate");
   }
   else if (whichUpdate == 3) {
-    whichUpdate = 0;
+    whichUpdate = 4;
     aqueue_reset();
     int m = get_mid();
     if (m > 0) load_queue(m, "mqueueUpdate");
+  }
+  else if (whichUpdate == 2) {
+    whichUpdate = 3;
+    check_notify();
+    // check for position 1
   }
   timer = app_timer_register(TIME_INTERVAL, timer_callback, NULL);
 }
