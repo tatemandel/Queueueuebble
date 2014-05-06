@@ -140,6 +140,8 @@ def confirm_reorder(request, queue):
     up_object = UserProfile.objects.get(user=user_object)
     no = nodes.get(user=up_object)
     no.position = i
+    if (no.position == 2):
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
     no.save()
     i = i + 1
 
@@ -183,11 +185,6 @@ def profile_id(request, username, uid):
     if 'removeMyself' in request.POST:
       if not user_node == None:
         del_pos = user_node.position
-        if queue.size > 1 and del_pos < 2:
-            nextUserNode = None
-            nextUserNode = nodes[2]
-            uNextUser = nextUserNode.user.user
-            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [uNextUser.email], fail_silently=False)
         user_node.delete()
         queue.size = queue.size - 1
         queue.save()
@@ -195,6 +192,8 @@ def profile_id(request, username, uid):
         for n in nodes:
           if n.position > del_pos:
             n.position = n.position - 1
+            if (n.position == 2):
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
             n.save()
       contains = False
     if 'removeFromMyQueue' in request.POST:
@@ -206,18 +205,16 @@ def profile_id(request, username, uid):
         if not len(uRemoveNodes) == 0:
           uRemoveNode = uRemoveNodes[0];
           uRemovePos = uRemoveNode.position
-          if queue.size > 1 and uRemovePos < 2:
-            nextUserNode = None
-            nextUserNode = nodes[2]
-            uNextUser = nextUserNode.user.user
-            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [uNextUser.email], fail_silently=False)
           uRemoveNode.delete()
           queue.size = queue.size - 1
+          if (n.position == 2):
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
           queue.save();
           nodes = list(Node.objects.filter(queue=queue))
           for n in nodes:
             if n.position > uRemovePos:
               n.position = n.position - 1
+              
               n.save()
     if 'changeStatus' in request.POST:
       userNameS = request.POST.get('statusChangeUser')
@@ -511,6 +508,8 @@ def pebble_update_status(request):
     puser = UserProfile.objects.get(user=user)
     queue = Queue.objects.get(id=qid)
     nodes = Node.objects.filter(queue=queue, user=puser)
+    qnodes = list(Nodes.object.filter(queue))
+    qnodes.sort(key=lambda x: x.position)
     node = nodes[0]
     print node
     if typ == "nstart":
@@ -530,19 +529,29 @@ def pebble_update_status(request):
           print n.user.user.username
           print n.position
           n.position = n.position - 1
+          if (n.position == 2):
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
           n.save()
     elif typ == "up":
       if not node.position == 0:
         node2 = Node.objects.get(queue=queue, position = node.position - 1)
         node2.position = node.position
+        if (node.position == 2):
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
         # update other
         node.position = node.position - 1;
+        if (node.position == 2):
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [n.user.user.email], fail_silently=False)
     elif typ == "down":
       if not node.position == queue.size - 1:
         node2 = Node.objects.get(queue=queue, position = node.position + 1)
         node2.position = node.position
+        if (node2.position == 2):
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node2.user.user.email], fail_silently=False)
         # update other
         node.position = node.position + 1;
+        if (node.position == 2):
+            send_mail('Youre on deck!', 'Yo get ready', 'jonathanp.chen@gmail.com', [node.user.user.email], fail_silently=False)
           
     data = []
     # for n in nodes:
