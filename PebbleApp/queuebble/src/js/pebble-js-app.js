@@ -75,7 +75,7 @@ function getOwned(username) {
         d["4"] = e['size'];
         d["5"] = e['status'] == "true" ? 1 : 0;
         d["6"] = ob.length;
-	d["11"] = 0;
+	d["12"] = 0;
         data.push(d);
       });
       sendMessages(data);
@@ -112,7 +112,7 @@ function getUpdatedOwned(username) {
         d["4"] = e['size'];
         d["5"] = e['status'] == "true" ? 1 : 0;
         d["6"] = ob.length;
-	d["11"] = 1;
+	d["12"] = 1;
         data.push(d);
       });
       sendMessages(data);
@@ -150,7 +150,7 @@ function getMember(username) {
         d["6"] = ob.length;
         d["7"] = e['creator'];
         d["8"] = e['position'];
-	d["11"] = 0;
+	d["12"] = 0;
         data.push(d);
       });
       sendMessages(data);
@@ -188,7 +188,7 @@ function getUpdatedMember(username) {
         d["6"] = ob.length;
         d["7"] = e['creator'];
         d["8"] = e['position'];
-	d["11"] = 1;
+	d["12"] = 1;
         data.push(d);
       });
       sendMessages(data);
@@ -227,6 +227,46 @@ function getQueue(id, type) {
         d["6"] = ob.length;
         d["8"] = e['position'];
         d["9"] = type;
+	d["12"] = 0;
+        data.push(d);
+      });
+      sendMessages(data);
+    } else {
+      console.log(http.responseText);
+    }
+  }
+  http.send(params);
+}
+
+function getUpdatedQueue(id, type) {
+  var http = new XMLHttpRequest();
+  var params = "id=" + id;
+  http.open("POST", "HTTP://54.84.161.157/pebble_get_queue/", true);
+
+  http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  http.setRequestHeader("Content-length", params.length);
+  http.setRequestHeader("Connection", "close");
+
+  http.onload = function() {
+    if (http.status == 200) {
+      console.log(http.responseText);
+      var ob = JSON.parse(http.responseText);
+      var data = [];
+      if (ob.length == 0) {
+        d = {};
+	d["10"] = 3;
+	d["9"] = type;
+        data.push(d);  
+      }
+      ob.forEach(function(e) { 
+        d = {};
+        d["1"] = e['username'];
+        d["2"] = e['id'];
+        d["5"] = e['status'];
+        d["6"] = ob.length;
+        d["8"] = e['position'];
+        d["9"] = type;
+	d["12"] = 1;
         data.push(d);
       });
       sendMessages(data);
@@ -257,7 +297,7 @@ function updateStatus(id, username, type, admin) {
           d = {};
           d["10"] = 3;
           d["9"] = type;
-          d["11"] = 0; // 0 for don't show
+          d["12"] = 0; // 0 for don't show
           data.push(d);  
         }
         ob.forEach(function(e) { 
@@ -269,6 +309,7 @@ function updateStatus(id, username, type, admin) {
           d["8"] = e['position'];
           d["9"] = admin;
           d["11"] = 0; // 0 for don't show
+          d["12"] = 0; // 0 for don't show
           data.push(d);
         });
         sendMessages(data);
@@ -303,5 +344,9 @@ Pebble.addEventListener("appmessage", function(e) {
     getUpdatedMember(e.payload[2]);
   } else if (t == "adminUpdate") {
     getUpdatedOwned(e.payload[2]);
+  } else if (t == "aqueueUpdate") {
+      getUpdatedQueue(e.payload[2], 1);
+  } else if (t == "mqueueUpdate") {
+      getUpdatedQueue(e.payload[2], 2);
   }
-});
+ });

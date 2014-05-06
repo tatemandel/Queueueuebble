@@ -14,10 +14,16 @@ static TextLayer *text_layer;
 
 amember mem[20];
 int asize = 0;
+int aid = 0;
 
 // For functions below eventually cell_index-> row should index 
 // into an an array of members and this would be dependent on the
 // queue at that index
+
+Layer *getAQueueWindowLayer() {
+  Layer *window_layer = window_get_root_layer(window);
+  return window_layer;
+}
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, 
 				   MenuIndex *cell_index, void *data) {
@@ -125,7 +131,8 @@ void aqueue_deinit(void) {
   window_destroy(window);
 }
 
-void aqueue_show(void) {
+void aqueue_show(int id) {
+  aid = id;
   const bool animated = true;
   window_stack_push(window, animated);
 }
@@ -142,4 +149,8 @@ void aqueue_add(char *username, int id, int pos, int status) {
 
 void aqueue_reset() {
   asize = 0;
+}
+
+int get_aid() {
+  return aid;
 }
